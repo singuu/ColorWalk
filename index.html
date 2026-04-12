@@ -126,11 +126,30 @@
       .preview-panel {
         flex: 0 0 auto;
         max-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
       #preview-canvas-container {
         max-width: 100%;
         max-height: 60vh;
         aspect-ratio: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #preview-wrap {
+        max-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #canvas-preview {
+        max-height: 60vh;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
       }
       .editor-panel {
         flex: 1;
