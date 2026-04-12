@@ -170,8 +170,11 @@
         font-size: 11px;
       }
       .palette-swatch, .color-plus-btn {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
+      }
+      .palette-row {
+        gap: 8px;
       }
       .font-btn {
         padding: 6px 14px;
@@ -810,6 +813,7 @@
         <div class="icon">🎨</div>
         <p>点击上传图片</p>
         <p style="font-size: 11px; color: #666; margin-top: 8px;">自动提取地点时间</p>
+        <p style="font-size: 10px; color: #555; margin-top: 4px;">建议在微信内打开</p>
       </div>
       <!-- 加载中 -->
       <div id="loading">
@@ -1164,8 +1168,6 @@ async function handleFile(file) {
               console.log('Location found:', locStr, 'from address:', addr);
             } catch(e) {
               console.log('Location fetch error:', e);
-              document.getElementById('debug-section').style.display = 'block';
-              document.getElementById('debug-content').textContent = 'Error: ' + e.message;
             }
           }
           // Save extracted location and time to state
