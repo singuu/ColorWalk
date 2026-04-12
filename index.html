@@ -88,6 +88,43 @@
       width: 100%;
     }
 
+    /* 手机端适配 */
+    @media (max-width: 768px) {
+      .header {
+        padding: 16px 20px;
+      }
+      .header-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+      .header-center {
+        display: none;
+      }
+      .main-container {
+        flex-direction: column;
+        padding: 16px;
+        gap: 24px;
+      }
+      .preview-panel {
+        order: 1;
+      }
+      .editor-panel {
+        order: 2;
+        width: 100%;
+        gap: 20px;
+      }
+      #preview-canvas-container {
+        max-width: 100%;
+      }
+      .section-title {
+        font-size: 12px;
+      }
+      .field-label {
+        font-size: 11px;
+      }
+    }
+
     /* 左侧展示区 */
     .preview-panel {
       flex: 1;
