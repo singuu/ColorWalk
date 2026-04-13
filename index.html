@@ -2,8 +2,20 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0a0a0a" />
   <title>ColorWalk</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9T62Y74DK9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-9T62Y74DK9');
+  </script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -14,6 +26,45 @@
       color: #fff;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+      /* 安全区域设置 */
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    
+    /* 移除默认的点击高亮 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* 移除底部导航箭头 */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    
+    /* 防止双击缩放 */
+    * {
+      touch-action: manipulation;
+    }
+    
+    /* 全局动画 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .animate-slide-in {
+      animation: slideIn 0.4s ease-out forwards;
     }
 
     /* ═══════════════════════════════════════════════════════
@@ -92,60 +143,63 @@
     @media (max-width: 768px) {
       body {
         overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
       }
       .header {
-        padding: 8px 16px;
+        padding: 12px 16px;
         flex-shrink: 0;
-        min-height: 48px;
+        min-height: 60px;
       }
       .header-left {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1px;
+        gap: 4px;
       }
       .header-left div {
-        font-size: 8px;
+        font-size: 10px;
       }
       .header-right {
-        gap: 8px;
+        gap: 12px;
       }
       .header-btn {
-        padding: 6px 12px;
-        font-size: 11px;
+        padding: 10px 16px;
+        font-size: 12px;
+        min-width: 80px;
       }
       .header-center {
         display: none;
       }
       .main-container {
         flex-direction: column;
-        padding: 8px 12px 12px;
-        gap: 8px;
-        height: calc(100vh - 48px);
+        padding: 12px 16px 32px;
+        gap: 16px;
+        height: calc(100vh - 60px - env(safe-area-inset-bottom));
         overflow: hidden;
       }
       .preview-panel {
         flex: 0 0 auto;
-        max-height: 60vh;
+        max-height: 55vh;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       #preview-canvas-container {
         max-width: 100%;
-        max-height: 60vh;
+        max-height: 55vh;
         aspect-ratio: auto;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-width: 3px;
       }
       #preview-wrap {
-        max-height: 60vh;
+        max-height: 55vh;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       #canvas-preview {
-        max-height: 60vh;
+        max-height: 55vh;
         max-width: 100%;
         width: auto;
         height: auto;
@@ -154,34 +208,76 @@
       .editor-panel {
         flex: 1;
         width: 100%;
-        gap: 12px;
+        gap: 16px;
         overflow-y: auto;
-        padding-right: 4px;
+        padding-right: 8px;
+        -webkit-overflow-scrolling: touch;
       }
       .section-title {
-        font-size: 11px;
-        margin-bottom: 8px;
+        font-size: 12px;
+        margin-bottom: 10px;
+        letter-spacing: 2px;
       }
       .field-label {
-        font-size: 10px;
+        font-size: 11px;
+        margin-bottom: 10px;
       }
       .ratio-btn {
-        padding: 5px 12px;
-        font-size: 11px;
+        padding: 8px 16px;
+        font-size: 12px;
+        min-width: 70px;
       }
       .palette-swatch, .color-plus-btn {
-        width: 28px;
-        height: 28px;
+        width: 40px;
+        height: 40px;
       }
       .palette-row {
-        gap: 8px;
+        gap: 12px;
       }
       .font-btn {
-        padding: 6px 14px;
-        font-size: 12px;
+        padding: 10px 18px;
+        font-size: 14px;
+        min-width: 60px;
       }
       .slider-row input[type=range] {
+        height: 8px;
+      }
+      .slider-row {
+        gap: 12px;
+      }
+      .field-wrap input[type=text] {
+        padding: 12px 16px;
+        font-size: 16px;
+      }
+      .noise-toggle {
+        font-size: 14px;
+        gap: 12px;
+      }
+      .noise-toggle input[type=checkbox] {
+        width: 44px;
+        height: 24px;
+      }
+      .noise-toggle input[type=checkbox]::after {
+        width: 16px;
+        height: 16px;
+      }
+      .noise-toggle input[type=checkbox]:checked::after {
+        left: 22px;
+      }
+      .mode-tab {
+        padding: 10px 20px;
+        font-size: 13px;
+      }
+      .split-handle {
+        height: 32px;
+      }
+      .split-handle::before {
+        width: 50px;
         height: 6px;
+      }
+      #drag-hint {
+        font-size: 12px;
+        padding: 8px 12px;
       }
     }
 
@@ -235,19 +331,45 @@
       width: 100%;
       height: 100%;
       z-index: 2;
-      background: rgba(18,18,18,0.9);
+      background: rgba(18,18,18,0.95);
     }
     #loading.visible { display: flex; }
     .spinner {
-      width: 36px;
-      height: 36px;
-      border: 2px solid #333;
+      width: 40px;
+      height: 40px;
+      border: 3px solid #333;
       border-top-color: #888;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    #loading-text { color: #888; font-size: 13px; letter-spacing: 0.5px; }
+    #loading-text { 
+      color: #fff; 
+      font-size: 14px; 
+      letter-spacing: 1px;
+      font-weight: 300;
+    }
+    #loading-subtext {
+      color: #888;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      margin-top: -8px;
+    }
+    .loading-progress {
+      width: 200px;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .loading-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #69db7c, #4dabf7);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
     #preview-wrap {
       display: none;
       width: 100%;
@@ -818,7 +940,11 @@
       <!-- 加载中 -->
       <div id="loading">
         <div class="spinner"></div>
-        <p id="loading-text">正在分析图片...</p>
+        <p id="loading-text">正在加载图片...</p>
+        <div class="loading-progress">
+          <div class="loading-bar"></div>
+        </div>
+        <p id="loading-subtext">准备为您创建精美效果</p>
       </div>
       <!-- 画布 -->
       <div id="preview-wrap">
@@ -930,7 +1056,7 @@
         </label>
         
         <!-- 自定义输入 -->
-        <input type="text" id="caption-input" placeholder="自定义文字" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 14px; color: #ddd; font-size: 14px; outline: none; display: none;">
+        <input type="text" id="caption-input" placeholder="输入文字" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 14px; color: #ddd; font-size: 14px; outline: none; display: none;">
       </div>
     </div>
 
@@ -1081,125 +1207,157 @@ async function handleFile(file) {
     placeholder.style.display = 'none';
 
     var lt = document.getElementById('loading-text');
+    var ls = document.getElementById('loading-subtext');
+    var loadingBar = document.querySelector('.loading-bar');
+    
     function setLoadingText(t) { if (lt) lt.textContent = t; }
+    function setLoadingSubtext(t) { if (ls) ls.textContent = t; }
+    function updateProgress(percent) {
+      if (loadingBar) {
+        loadingBar.style.width = percent + '%';
+      }
+    }
 
+    // 初始化进度
+    updateProgress(0);
     setLoadingText('加载图片...');
+    setLoadingSubtext('正在读取图片文件');
+    
+    // 加载图片
     var url = URL.createObjectURL(file);
     imgEl = new Image();
     await new Promise(function(res, rej) { imgEl.onload = res; imgEl.onerror = rej; imgEl.src = url; });
+    updateProgress(30);
 
+    // 提取颜色
     setLoadingText('提取颜色...');
-    palette = extractPalette(imgEl, 8);
+    setLoadingSubtext('分析图片色彩信息');
+    // 优化：减少颜色提取的计算量，提高速度
+    palette = extractPalette(imgEl, 6); // 减少聚类数量
+    updateProgress(60);
 
-    // Clear user-saved gradients when uploading new image
+    // 渲染调色板
+    setLoadingText('生成效果...');
+    setLoadingSubtext('创建个性化调色板');
     document._savedGradients = [];
-
-    setLoadingText('选中颜色...');
     renderBgPalette();
     selectBg(0);
+    updateProgress(75);
 
     photoOffsetX = 0;
     photoOffsetY = 0;
 
-    // EXIF
-    if (!exifrReady) {
-      for (var wi = 0; wi < 30 && !exifrReady; wi++) {
-        await new Promise(function(r) { setTimeout(r, 100); });
+    // 并行处理 EXIF 数据，不阻塞主线程
+    setLoadingText('优化效果...');
+    setLoadingSubtext('提取位置和时间信息');
+    
+    // 优化：不等待 exifr 加载完成，直接处理
+    if (window.exifr) {
+      try {
+        // 添加超时处理，避免地理编码请求过慢
+        const exifPromise = window.exifr.parse(file, { gps: true, tiff: true });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('EXIF 处理超时')), 3000));
+        
+        try {
+          var exif = await Promise.race([exifPromise, timeoutPromise]);
+          if (exif) {
+            var dt = exif.DateTimeOriginal || exif.DateTime || exif.CreateDate;
+            var locStr = '';
+            var timeStr = '';
+            
+            if (dt) {
+              var dd = dt instanceof Date ? dt : new Date(dt);
+              if (!isNaN(dd)) {
+                var hh = dd.getHours();
+                var mm = String(dd.getMinutes()).padStart(2, '0');
+                var ap = hh >= 12 ? 'pm' : 'am';
+                var h12 = hh % 12 || 12;
+                timeStr = h12 + ':' + mm + ' ' + ap;
+              }
+            }
+            
+            if (exif.latitude && exif.longitude) {
+              try {
+                // 添加地理编码超时处理
+                const geoPromise = fetch(
+                  'https://nominatim.openstreetmap.org/reverse?lat=' + exif.latitude + '&lon=' + exif.longitude + '&format=json',
+                  { headers: { 'Accept-Language': 'en' }, timeout: 2000 }
+                );
+                const geoTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('地理编码超时')), 2000));
+                
+                try {
+                  var r = await Promise.race([geoPromise, geoTimeout]);
+                  var g = await r.json();
+                  var addr = g.address || {};
+                  var country = addr.country || '';
+                  var city = '';
+                  
+                  if (country === 'China' || country === '中国') {
+                    city = addr.state || addr.province || addr.city || '';
+                  } else {
+                    city = addr.city || addr.town || addr.village || addr.county || addr.state || 
+                           addr.district || addr.suburb || '';
+                  }
+                  
+                  if (city && country) {
+                    if (country === 'China' || country === '中国') {
+                      locStr = city;
+                    } else {
+                      locStr = city + ', ' + country;
+                    }
+                  } else {
+                    locStr = city || country || '';
+                  }
+                } catch(geoErr) {
+                  console.log('地理编码请求超时，跳过位置信息');
+                }
+              } catch(e) {
+                console.log('Location fetch error:', e);
+              }
+            }
+            
+            extractedLocation = locStr;
+            extractedTime = timeStr;
+            
+            var hasLocation = !!locStr;
+            var hasTime = !!timeStr;
+            document.getElementById('show-location-toggle').checked = hasLocation;
+            document.getElementById('show-time-toggle').checked = hasTime;
+            showLocation = hasLocation;
+            showTime = hasTime;
+            
+            if (!hasLocation && !hasTime) {
+              showCustom = true;
+              document.getElementById('show-custom-toggle').checked = true;
+              document.getElementById('caption-input').value = 'Location, Time';
+              document.getElementById('caption-input').style.display = 'block';
+            } else {
+              showCustom = false;
+              document.getElementById('show-custom-toggle').checked = false;
+              document.getElementById('caption-input').value = '';
+              document.getElementById('caption-input').style.display = 'none';
+            }
+          }
+        } catch(timeoutErr) {
+          console.log('EXIF 处理超时，跳过位置和时间信息');
+        }
+      } catch(exifErr) {
+        console.log('EXIF 解析错误:', exifErr);
       }
     }
-    if (exifrReady) {
-      try {
-        var exif = await window.exifr.parse(file, { gps: true, tiff: true });
-        if (exif) {
-          var dt = exif.DateTimeOriginal || exif.DateTime || exif.CreateDate;
-          var locStr = '';
-          var timeStr = '';
-          if (dt) {
-            var dd = dt instanceof Date ? dt : new Date(dt);
-            if (!isNaN(dd)) {
-              var hh = dd.getHours();
-              var mm = String(dd.getMinutes()).padStart(2, '0');
-              var ap = hh >= 12 ? 'pm' : 'am';
-              var h12 = hh % 12 || 12;
-              timeStr = h12 + ':' + mm + ' ' + ap;
-            }
-          }
-          if (exif.latitude && exif.longitude) {
-            try {
-              var r = await fetch(
-                'https://nominatim.openstreetmap.org/reverse?lat=' + exif.latitude + '&lon=' + exif.longitude + '&format=json',
-                { headers: { 'Accept-Language': 'en' } }
-              );
-              var g = await r.json();
-              var addr = g.address || {};
-              var country = addr.country || '';
-              var city = '';
-              
-              // For China, use state (province) as city, because city is often district
-              if (country === 'China' || country === '中国') {
-                city = addr.state || addr.province || addr.city || '';
-              } else {
-                city = addr.city || addr.town || addr.village || addr.county || addr.state || 
-                       addr.district || addr.suburb || '';
-              }
-              
-              // Format: China shows city only, other countries show city, country
-              if (city && country) {
-                if (country === 'China' || country === '中国') {
-                  locStr = city;
-                } else {
-                  locStr = city + ', ' + country;
-                }
-              } else {
-                locStr = city || country || '';
-              }
-              
-              // Debug info
-              var debugInfo = {
-                latitude: exif.latitude,
-                longitude: exif.longitude,
-                address: addr,
-                city: city,
-                country: country,
-                result: locStr
-              };
-              document.getElementById('debug-section').style.display = 'block';
-              document.getElementById('debug-content').textContent = JSON.stringify(debugInfo, null, 2);
-              console.log('Location found:', locStr, 'from address:', addr);
-            } catch(e) {
-              console.log('Location fetch error:', e);
-            }
-          }
-          // Save extracted location and time to state
-          extractedLocation = locStr;
-          extractedTime = timeStr;
-          
-          // Update toggle switches based on whether data was extracted
-          var hasLocation = !!locStr;
-          var hasTime = !!timeStr;
-          document.getElementById('show-location-toggle').checked = hasLocation;
-          document.getElementById('show-time-toggle').checked = hasTime;
-          showLocation = hasLocation;
-          showTime = hasTime;
-          
-          // If no location and no time, enable custom with default text
-          if (!hasLocation && !hasTime) {
-            showCustom = true;
-            document.getElementById('show-custom-toggle').checked = true;
-            document.getElementById('caption-input').value = 'Location, Time';
-            document.getElementById('caption-input').style.display = 'block';
-          } else {
-            showCustom = false;
-            document.getElementById('show-custom-toggle').checked = false;
-            document.getElementById('caption-input').value = '';
-            document.getElementById('caption-input').style.display = 'none';
-          }
-        }
-      } catch(exifErr) {}
-    }
+    
+    updateProgress(90);
 
-    // Enable download button
+    // 启用下载按钮
     downloadHeaderBtn.disabled = false;
+
+    // 完成加载
+    setLoadingText('准备就绪...');
+    setLoadingSubtext('即将展示您的作品');
+    updateProgress(100);
+    
+    // 短暂延迟，让用户看到完成状态
+    await new Promise(r => setTimeout(r, 300));
 
     loadingEl.style.display = 'none';
     previewWrap.style.display = 'block';
@@ -1565,7 +1723,16 @@ function drawCanvas() {
 
   // Photo drag
   canvas.addEventListener('mousedown', function(e) { e.preventDefault(); photoD = true; canvas.classList.add('photo-dragging'); lx = e.clientX; ly = e.clientY; });
-  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); photoD = true; canvas.classList.add('photo-dragging'); lx = e.touches[0].clientX; ly = e.touches[0].clientY; }, { passive: false });
+  canvas.addEventListener('touchstart', function(e) { 
+    e.preventDefault(); 
+    photoD = true; 
+    canvas.classList.add('photo-dragging'); 
+    lx = e.touches[0].clientX; 
+    ly = e.touches[0].clientY; 
+    // 添加触摸反馈
+    canvas.style.transform = 'scale(0.98)';
+    canvas.style.transition = 'transform 0.1s ease';
+  }, { passive: false });
   document.addEventListener('mousemove', function(e) {
     if (!photoD) return;
     e.preventDefault();
@@ -1583,14 +1750,34 @@ function drawCanvas() {
     e.preventDefault();
     var rect = canvas.getBoundingClientRect();
     var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
-    photoOffsetX += (tx - lx) / rect.width * 2;
-    photoOffsetY += (ty - ly) / rect.height * 2;
+    // 优化触摸滑动的平滑度
+    var deltaX = (tx - lx) / rect.width * 2;
+    var deltaY = (ty - ly) / rect.height * 2;
+    // 添加惯性效果
+    photoOffsetX += deltaX * 0.8;
+    photoOffsetY += deltaY * 0.8;
     photoOffsetX = Math.max(-1, Math.min(1, photoOffsetX));
     photoOffsetY = Math.max(-1, Math.min(1, photoOffsetY));
     lx = tx; ly = ty;
     drawCanvas();
     posHandle();
   }, { passive: false });
+  document.addEventListener('mouseup', function() { 
+    if (photoD) { 
+      photoD = false; 
+      canvas.classList.remove('photo-dragging');
+      // 重置触摸反馈
+      canvas.style.transform = 'scale(1)';
+    } 
+  });
+  document.addEventListener('touchend', function() { 
+    if (photoD) { 
+      photoD = false; 
+      canvas.classList.remove('photo-dragging');
+      // 重置触摸反馈
+      canvas.style.transform = 'scale(1)';
+    } 
+  });
   document.addEventListener('mouseup', function() { if (photoD) { photoD = false; canvas.classList.remove('photo-dragging'); } });
   document.addEventListener('touchend', function() { if (photoD) { photoD = false; canvas.classList.remove('photo-dragging'); } });
 
