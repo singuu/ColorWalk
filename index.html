@@ -44,8 +44,90 @@
     }
     
     /* 防止双击缩放 */
-    * {
+    button, input, select {
       touch-action: manipulation;
+    }
+    
+    /* 底部导航栏 - 仅在移动端显示 */
+    @media (max-width: 768px) {
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(10, 10, 10, 0.95);
+        border-top: 1px solid #1a1a1a;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 8px 0;
+        z-index: 100;
+        /* 安全区域设置 */
+        padding-bottom: calc(8px + env(safe-area-inset-bottom));
+      }
+      
+      .nav-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: #888;
+        padding: 4px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 10px;
+        letter-spacing: 0.5px;
+      }
+      
+      .nav-btn svg {
+        width: 18px !important;
+        height: 18px !important;
+        margin-bottom: 2px !important;
+      }
+      
+      .nav-btn:hover {
+        color: #aaa;
+      }
+      
+      .nav-btn.active {
+        color: #fff;
+      }
+      
+      .nav-btn span {
+        margin-top: 4px;
+      }
+      
+      /* 面板内容 */
+      .edit-panel-content {
+        width: 100%;
+      }
+      
+      .panel-content {
+        display: none;
+        animation: fadeIn 0.3s ease-out;
+      }
+      
+      .panel-content.active {
+        display: block !important;
+      }
+    }
+    
+    /* 桌面端布局 */
+    @media (min-width: 769px) {
+      .bottom-nav {
+        display: none;
+      }
+      
+      .edit-panel-content {
+        width: 100%;
+      }
+      
+      .panel-content {
+        display: block;
+        margin-bottom: 32px;
+      }
     }
     
     /* 全局动画 */
@@ -144,12 +226,12 @@
     /* 手机端适配 */
     @media (max-width: 768px) {
       body {
-        overflow: hidden;
         -webkit-tap-highlight-color: transparent;
+        height: 100vh;
+        overflow: hidden;
       }
       .header {
         padding: 12px 16px;
-        flex-shrink: 0;
         min-height: 60px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -180,52 +262,85 @@
         display: none;
       }
       .main-container {
+        display: flex;
         flex-direction: column;
-        padding: 12px 16px 32px;
-        gap: 16px;
-        height: calc(100vh - 60px - env(safe-area-inset-bottom));
+        padding: 12px 16px 80px;
+        height: calc(100vh - 60px);
         overflow: hidden;
       }
       .preview-panel {
-        flex: 0 0 auto;
-        max-height: 55vh;
+        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-bottom: 8px;
+        min-height: 0;
       }
       #preview-canvas-container {
-        max-width: 100%;
-        max-height: 55vh;
-        aspect-ratio: auto;
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         border-width: 3px;
+        background-color: #222222;
+        background-image: 
+          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 20px 20px;
       }
       #preview-wrap {
-        max-height: 55vh;
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       #canvas-preview {
-        max-height: 55vh;
         max-width: 100%;
+        max-height: 100%;
         width: auto;
-        height: auto;
-        object-fit: contain;
+        height: 100%;
       }
       .editor-panel {
-        flex: 1;
+        max-height: 200px;
         width: 100%;
-        gap: 16px;
-        overflow-y: auto;
-        padding-right: 8px;
+        overflow-y: scroll;
+        padding: 0 16px 20px 16px;
         -webkit-overflow-scrolling: touch;
+        position: relative;
+        z-index: 1;
       }
+      
+      /* 颜色面板间距调整 */
+      #color-panel {
+        padding-bottom: 0;
+      }
+      
+      /* 移动端颜色面板模式标签间距 */
+      #color-panel .mode-tabs {
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      
+      /* 文字面板间距调整 */
+      #text-panel {
+        padding-bottom: 0;
+      }
+      
+      /* 比例面板间距调整 */
+      #ratio-panel {
+        padding-bottom: 0;
+      }
+      /* 隐藏移动端的标题，因为底部导航栏已经有标签 */
       .section-title {
-        font-size: 12px;
-        margin-bottom: 10px;
+        display: none;
+      }
+      /* 但保留比例和布局的标题，因为底部导航栏没有区分 */
+      #ratio-panel .section-title {
+        display: block;
+        font-size: 11px;
+        margin-bottom: 8px;
         letter-spacing: 2px;
       }
       .field-label {
@@ -303,9 +418,13 @@
     #preview-canvas-container {
       width: 100%;
       max-width: 480px;
-      aspect-ratio: 9/16;
+      aspect-ratio: 3/4;
       border: 2px dashed #333;
-      background: rgba(255,255,255,0.02);
+      background-color: #222222;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 20px 20px;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -381,14 +500,19 @@
       transition: width 0.3s ease;
     }
     #preview-wrap {
-      display: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
+      height: 100%;
       position: relative;
       z-index: 1;
     }
     #canvas-preview {
       display: block;
-      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
       height: auto;
     }
     #canvas-preview.pick-mode { cursor: crosshair; }
@@ -415,7 +539,7 @@
       height: 24px;
       z-index: 10;
       cursor: ns-resize;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
     }
@@ -441,6 +565,19 @@
       opacity: 0;
       transition: opacity 0.2s, border-color 0.2s;
     }
+    .split-handle.vertical::before {
+      width: 4px;
+      height: 40px;
+    }
+    .split-handle.vertical::after {
+      left: 50%;
+      right: auto;
+      top: 0;
+      bottom: 0;
+      transform: translateX(-50%);
+      border-top: none;
+      border-left: 2px dashed rgba(255,255,255,0.25);
+    }
     .split-handle:hover::after,
     #preview-wrap.dragging .split-handle::after {
       opacity: 1;
@@ -448,13 +585,22 @@
     .split-handle.at-center::after {
       border-top-color: rgba(100, 200, 255, 0.8);
     }
+    .split-handle.vertical.at-center::after {
+      border-left-color: rgba(100, 200, 255, 0.8);
+    }
     .split-handle:hover::before {
       background: rgba(255,255,255,0.6);
       transform: scaleX(1.3);
     }
+    .split-handle.vertical:hover::before {
+      transform: scaleY(1.3);
+    }
     #preview-wrap.dragging .split-handle::before {
       background: rgba(255,255,255,0.8);
       transform: scaleX(1.5);
+    }
+    #preview-wrap.dragging .split-handle.vertical::before {
+      transform: scaleY(1.5);
     }
 
     /* 右侧编辑区 */
@@ -499,8 +645,8 @@
     /* 背景模式 */
     .mode-tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 12px;
+      margin-bottom: 16px;
     }
     .mode-tab {
       padding: 6px 16px;
@@ -728,21 +874,126 @@
     .footer a:hover { color: #fff; }
 
     /* 颜色面板弹窗 */
-    .color-popover {
-      position: fixed;
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 14px;
-      padding: 16px;
-      z-index: 100;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      min-width: 260px;
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .color-popover.visible { display: flex; }
-    .color-popover.gradient-mode { min-width: 300px; }
+  .color-popover {
+    position: fixed;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 14px;
+    padding: 16px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    min-width: 260px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    /* 确保在底部导航栏上方 */
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .color-popover.visible { display: flex; }
+  .color-popover.gradient-mode { min-width: 300px; }
+  
+  /* 首页欢迎弹窗 */
+  .welcome-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .welcome-modal.visible {
+    display: flex;
+  }
+  
+  .welcome-modal-content {
+    background: #1e1e1e;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    max-width: 400px;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .welcome-modal-header {
+    background: linear-gradient(135deg, #ff6b6b, #4dabf7);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .welcome-modal-header h2 {
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .welcome-modal-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .welcome-modal-body {
+    padding: 24px;
+  }
+  
+  .welcome-date {
+    font-size: 14px;
+    color: #888;
+    margin: 0 0 16px 0;
+  }
+  
+  .welcome-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+  }
+  
+  .welcome-features li {
+    color: #ddd;
+    font-size: 14px;
+    margin-bottom: 8px;
+    padding-left: 20px;
+    position: relative;
+  }
+  
+  .welcome-features li::before {
+    content: '•';
+    color: #4dabf7;
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+  }
+  
+  .welcome-note {
+    color: #aaa;
+    font-size: 14px;
+    margin: 0 0 16px 0;
+    line-height: 1.4;
+  }
+  
+  .welcome-contact {
+    color: #666;
+    font-size: 12px;
+    margin: 0;
+  }
     .cp-header {
       display: flex;
       align-items: center;
@@ -915,6 +1166,26 @@
 </head>
 <body>
 
+<!-- 首页弹窗 -->
+<div id="welcome-modal" class="welcome-modal">
+  <div class="welcome-modal-content">
+    <div class="welcome-modal-header">
+      <h2>Hello～</h2>
+      <button class="welcome-modal-close">&times;</button>
+    </div>
+    <div class="welcome-modal-body">
+      <p class="welcome-date">20260414</p>
+      <ul class="welcome-features">
+        <li>修复已知问题，下拉更流畅</li>
+        <li>优化编辑交互，使用更简单</li>
+        <li>丰富图片布局，创作更有趣</li>
+      </ul>
+      <p class="welcome-note">微信打开体验更佳，大家玩的开心～</p>
+      <p class="welcome-contact">问题or建议🍠@singsing好</p>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════════════════════════════════════════════
      顶部标题区
 ═══════════════════════════════════════════════════════ -->
@@ -967,111 +1238,158 @@
 
   <!-- 右侧编辑区 -->
   <div class="editor-panel">
-    <!-- 画幅比例 -->
-    <div>
-      <p class="section-title">比例</p>
-      <div class="ratio-row" id="ratio-row">
-        <button class="ratio-btn active" data-ratio="3:4">3:4</button>
-        <button class="ratio-btn" data-ratio="1:1">1:1</button>
-        <button class="ratio-btn" data-ratio="9:16">9:16</button>
-        <button class="ratio-btn" data-ratio="4:3">4:3</button>
-      </div>
-    </div>
+    <!-- 编辑面板内容 -->
+    <div class="edit-panel-content">
+      <!-- 颜色面板 -->
+      <div id="color-panel" class="panel-content active">
 
-    <!-- 背景 -->
-    <div>
-      <p class="section-title">背景</p>
-      <div class="mode-tabs" id="mode-tabs">
-        <button class="mode-tab active" data-mode="solid">单色</button>
-        <button class="mode-tab" data-mode="gradient">渐变</button>
-      </div>
-      <div class="palette-row" id="bg-palette-row" style="margin-top: 14px;">
-        <!-- 5个主题色 + 1个加号 -->
-      </div>
-      <label class="noise-toggle" style="margin-top: 14px;">
-        <input type="checkbox" id="noise-toggle"> 复古纹理
-      </label>
-    </div>
-
-    <!-- 文字 -->
-    <div>
-      <p class="section-title">文字</p>
-      
-      <!-- 颜色 -->
-      <div style="margin-bottom: 16px;">
-        <p class="field-label" style="margin-bottom: 8px;">颜色</p>
-        <div class="palette-row" id="text-color-row">
-          <!-- 5 preset colors + custom -->
-          <div class="palette-swatch text-color-swatch selected" data-color="white" style="background: rgb(255,255,255);" title="白色"></div>
-          <div class="palette-swatch text-color-swatch" data-color="black" style="background: rgb(0,0,0);" title="黑色"></div>
-          <div class="palette-swatch text-color-swatch" data-color="lightyellow" style="background: rgb(255,250,205);" title="浅黄"></div>
-          <div class="palette-swatch text-color-swatch" data-color="lightblue" style="background: rgb(173,216,230);" title="浅蓝"></div>
-          <div class="palette-swatch text-color-swatch" data-color="lightpink" style="background: rgb(255,182,193);" title="浅粉"></div>
-          <button id="text-color-picker-btn" class="color-plus-btn" title="自定义颜色">
-            <svg viewBox="0 0 20 20" fill="none" style="width: 18px; height: 18px; pointer-events: none;">
-              <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-          </button>
+        <p class="section-title">背景</p>
+        <div class="mode-tabs" id="mode-tabs">
+          <button class="mode-tab active" data-mode="solid">单色</button>
+          <button class="mode-tab" data-mode="gradient">渐变</button>
         </div>
-      </div>
-      
-      <!-- 字体 -->
-      <div style="margin-bottom: 16px;">
-        <p class="field-label" style="margin-bottom: 8px;">字体</p>
-        <div class="font-row" id="font-row">
-          <button class="font-btn" data-font="handwriting">Aa</button>
-          <button class="font-btn active" data-font="typewriter">Aa</button>
-          <button class="font-btn" data-font="modern">Aa</button>
+        <div class="palette-row" id="bg-palette-row" style="margin-top: 16px;">
+          <!-- 5个主题色 + 1个加号 -->
         </div>
-      </div>
-      
-      <!-- 字号 -->
-      <div style="margin-bottom: 16px;">
-        <p class="field-label" style="margin-bottom: 8px;">字号</p>
-        <div class="slider-row">
-          <input type="range" id="font-size-slider" min="20" max="80" value="36" step="1">
-          <span id="font-size-val">36</span>
-        </div>
-      </div>
-      
-      <!-- 字距 -->
-      <div style="margin-bottom: 16px;">
-        <p class="field-label" style="margin-bottom: 8px;">字距</p>
-        <div class="slider-row">
-          <input type="range" id="letter-spacing-slider" min="0" max="30" value="2" step="0.5">
-          <span id="letter-spacing-val">2</span>
-        </div>
-      </div>
-      
-      <!-- 内容 -->
-      <div>
-        <p class="field-label" style="margin-bottom: 12px;">内容</p>
-        
-        <!-- 城市开关 -->
-        <label class="noise-toggle" style="margin-bottom: 10px; display: flex;">
-          <input type="checkbox" id="show-location-toggle" checked> 
-          <span style="margin-left: 8px; font-size: 12px; color: #888;">城市</span>
+        <label class="noise-toggle" style="margin-top: 16px;">
+          <input type="checkbox" id="noise-toggle"> 复古纹理
         </label>
         
-        <!-- 时间开关 -->
-        <label class="noise-toggle" style="margin-bottom: 12px; display: flex;">
-          <input type="checkbox" id="show-time-toggle" checked> 
-          <span style="margin-left: 8px; font-size: 12px; color: #888;">时间</span>
-        </label>
+
+      </div>
+      
+      <!-- 文字面板 -->
+      <div id="text-panel" class="panel-content">
+
         
-        <!-- 自定义开关 -->
-        <label class="noise-toggle" style="margin-bottom: 10px; display: flex;">
-          <input type="checkbox" id="show-custom-toggle"> 
-          <span style="margin-left: 8px; font-size: 12px; color: #888;">自定义</span>
-        </label>
+        <p class="section-title">文字</p>
+        <!-- 文字颜色 -->
+        <div style="margin-bottom: 16px;">
+          <p class="field-label" style="margin-bottom: 8px;">文字颜色</p>
+          <div class="palette-row" id="text-color-row">
+            <!-- 5 preset colors + custom -->
+            <div class="palette-swatch text-color-swatch selected" data-color="white" style="background: rgb(255,255,255);" title="白色"></div>
+            <div class="palette-swatch text-color-swatch" data-color="black" style="background: rgb(0,0,0);" title="黑色"></div>
+            <div class="palette-swatch text-color-swatch" data-color="lightyellow" style="background: rgb(255,250,205);" title="浅黄"></div>
+            <div class="palette-swatch text-color-swatch" data-color="lightblue" style="background: rgb(173,216,230);" title="浅蓝"></div>
+            <div class="palette-swatch text-color-swatch" data-color="lightpink" style="background: rgb(255,182,193);" title="浅粉"></div>
+            <button id="text-color-picker-btn" class="color-plus-btn" title="自定义颜色">
+              <svg viewBox="0 0 20 20" fill="none" style="width: 18px; height: 18px; pointer-events: none;">
+                <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
         
-        <!-- 自定义输入 -->
-        <input type="text" id="caption-input" placeholder="输入文字" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 14px; color: #ddd; font-size: 14px; outline: none; display: none;">
+        <!-- 字体 -->
+        <div style="margin-bottom: 16px;">
+          <p class="field-label" style="margin-bottom: 8px;">字体</p>
+          <div class="font-row" id="font-row">
+            <button class="font-btn" data-font="handwriting">Aa</button>
+            <button class="font-btn active" data-font="typewriter">Aa</button>
+            <button class="font-btn" data-font="modern">Aa</button>
+          </div>
+        </div>
+        
+        <!-- 字号 -->
+        <div style="margin-bottom: 16px;">
+          <p class="field-label" style="margin-bottom: 8px;">字号</p>
+          <div class="slider-row">
+            <input type="range" id="font-size-slider" min="20" max="80" value="36" step="1">
+            <span id="font-size-val">36</span>
+          </div>
+        </div>
+        
+        <!-- 字距 -->
+        <div style="margin-bottom: 16px;">
+          <p class="field-label" style="margin-bottom: 8px;">字距</p>
+          <div class="slider-row">
+            <input type="range" id="letter-spacing-slider" min="0" max="30" value="2" step="0.5">
+            <span id="letter-spacing-val">2</span>
+          </div>
+        </div>
+        
+        <!-- 内容 -->
+        <div>
+          <p class="field-label" style="margin-bottom: 12px;">内容</p>
+          
+          <!-- 城市开关 -->
+          <label class="noise-toggle" style="margin-bottom: 10px; display: flex;">
+            <input type="checkbox" id="show-location-toggle" checked> 
+            <span style="margin-left: 8px; font-size: 12px; color: #888;">城市</span>
+          </label>
+          
+          <!-- 时间开关 -->
+          <label class="noise-toggle" style="margin-bottom: 12px; display: flex;">
+            <input type="checkbox" id="show-time-toggle" checked> 
+            <span style="margin-left: 8px; font-size: 12px; color: #888;">时间</span>
+          </label>
+          
+          <!-- 自定义开关 -->
+          <label class="noise-toggle" style="margin-bottom: 10px; display: flex;">
+            <input type="checkbox" id="show-custom-toggle"> 
+            <span style="margin-left: 8px; font-size: 12px; color: #888;">自定义</span>
+          </label>
+          
+          <!-- 自定义输入 -->
+          <input type="text" id="caption-input" placeholder="输入文字" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 14px; color: #ddd; font-size: 14px; outline: none; display: none;">
+        </div>
+      </div>
+      
+      <!-- 布局面板 -->
+      <div id="ratio-panel" class="panel-content">
+
+        <p class="section-title">比例</p>
+        <div class="ratio-row" id="ratio-row">
+          <button class="ratio-btn active" data-ratio="3:4">3:4</button>
+          <button class="ratio-btn" data-ratio="1:1">1:1</button>
+          <button class="ratio-btn" data-ratio="9:16">9:16</button>
+          <button class="ratio-btn" data-ratio="4:3">4:3</button>
+        </div>
+        
+
+        <p class="section-title" style="margin-top: 16px;">布局</p>
+        <div class="ratio-row" id="layout-row">
+          <button class="ratio-btn active" data-layout="bottom">原图在下</button>
+          <button class="ratio-btn" data-layout="top">原图在上</button>
+          <button class="ratio-btn" data-layout="left">原图在左</button>
+          <button class="ratio-btn" data-layout="right">原图在右</button>
+        </div>
+        
+
       </div>
     </div>
-
-
   </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     底部导航栏
+═══════════════════════════════════════════════════════ -->
+<div class="bottom-nav">
+  <button class="nav-btn active" data-panel="color-panel">
+    <svg viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; margin-bottom: 4px;">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 6v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6 12h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>颜色</span>
+  </button>
+  <button class="nav-btn" data-panel="text-panel">
+    <svg viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; margin-bottom: 4px;">
+      <path d="M4 7V4h16v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M9 20h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 4v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>文字</span>
+  </button>
+  <button class="nav-btn" data-panel="ratio-panel">
+    <svg viewBox="0 0 24 24" fill="none" style="width: 20px; height: 20px; margin-bottom: 4px;">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="21" x2="9" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>布局</span>
+  </button>
 </div>
 
 
@@ -1135,17 +1453,17 @@ var currentRatio = '3:4';
 var fontStyle = 'typewriter';
 var userFontScale = 1;
 var userLetterSpacing = 2;
-var photoRatio = 0.55;
+var photoRatio = 0.5;
 var photoOffsetX = 0;
 var photoOffsetY = 0;
+var photoScale = 1;
 var noiseEnabled = false;
-var pickMode = false;
-var gradientPickState = null;
 var showLocation = true;
 var showTime = true;
 var showCustom = false;
 var extractedLocation = '';
 var extractedTime = '';
+var currentLayout = 'bottom'; // 布局：bottom（原图在下）或 top（原图在上）
 
 var ratioMap = { '3:4': 3/4, '1:1': 1, '9:16': 9/16, '4:3': 4/3 };
 
@@ -1156,6 +1474,125 @@ var placeholder = document.getElementById('preview-placeholder');
 var previewWrap = document.getElementById('preview-wrap');
 var loadingEl = document.getElementById('loading');
 var canvas = document.getElementById('canvas-preview');
+var welcomeModal = document.getElementById('welcome-modal');
+var welcomeCloseBtn = document.querySelector('.welcome-modal-close');
+
+// 欢迎弹窗逻辑
+function initWelcomeModal() {
+  // 强制显示弹窗测试
+  console.log('initWelcomeModal called');
+  welcomeModal.classList.add('visible');
+  
+  // 检查日期（20260414 - 20260415）
+  // var today = new Date();
+  // var todayStr = today.getFullYear() + 
+  //               String(today.getMonth() + 1).padStart(2, '0') + 
+  //               String(today.getDate()).padStart(2, '0');
+  // 
+  // var startDate = '20260414';
+  // var endDate = '20260415';
+  // 
+  // // 检查是否在显示日期范围内
+  // if (todayStr >= startDate && todayStr <= endDate) {
+  //   // 检查今天是否已经显示过
+  //   var lastShownDate = localStorage.getItem('welcomeModalLastShown');
+  //   if (lastShownDate !== todayStr) {
+  //     // 显示弹窗
+  //     welcomeModal.classList.add('visible');
+  //     
+  //     // 标记今天已显示
+  //     localStorage.setItem('welcomeModalLastShown', todayStr);
+  //   }
+  // }
+}
+
+// 关闭弹窗
+function closeWelcomeModal() {
+  welcomeModal.classList.remove('visible');
+}
+
+// 点击关闭按钮
+if (welcomeCloseBtn) {
+  welcomeCloseBtn.addEventListener('click', closeWelcomeModal);
+}
+
+// 点击空白处关闭
+if (welcomeModal) {
+  welcomeModal.addEventListener('click', function(e) {
+    if (e.target === welcomeModal) {
+      closeWelcomeModal();
+    }
+  });
+}
+
+// 初始化弹窗
+initWelcomeModal();
+
+// 底部导航栏切换
+var navBtns = document.querySelectorAll('.nav-btn');
+var panels = document.querySelectorAll('.panel-content');
+
+console.log('navBtns:', navBtns.length);
+console.log('panels:', panels.length);
+
+navBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    console.log('Nav button clicked:', this.dataset.panel);
+    var targetPanel = this.dataset.panel;
+    
+    // 更新导航按钮状态
+    navBtns.forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    
+    // 更新面板显示
+    panels.forEach(function(panel) {
+      panel.classList.remove('active');
+    });
+    var targetPanelElement = document.getElementById(targetPanel);
+    console.log('Target panel:', targetPanelElement);
+    if (targetPanelElement) {
+      targetPanelElement.classList.add('active');
+      console.log('Panel activated:', targetPanel);
+      
+      // 控制分割线的显示/隐藏
+      var splitHandle = document.getElementById('split-handle');
+      if (splitHandle) {
+        var isDesktop = window.innerWidth >= 769;
+        if (isDesktop && imgEl) {
+          // 桌面端：只要有图片就显示分割线
+          splitHandle.style.display = 'flex';
+        } else {
+          // 移动端：只在布局面板时显示
+          if (targetPanel === 'ratio-panel' && imgEl) {
+            splitHandle.style.display = 'flex';
+          } else {
+            splitHandle.style.display = 'none';
+          }
+        }
+      }
+    }
+  });
+});
+
+// 监听窗口大小变化，更新分割线显示状态
+window.addEventListener('resize', function() {
+  var splitHandle = document.getElementById('split-handle');
+  if (splitHandle && imgEl) {
+    var isDesktop = window.innerWidth >= 769;
+    if (isDesktop) {
+      // 桌面端：显示分割线
+      splitHandle.style.display = 'flex';
+    } else {
+      // 移动端：检查是否在布局面板
+      var activePanel = document.querySelector('.panel-content.active');
+      if (activePanel && activePanel.id === 'ratio-panel') {
+        splitHandle.style.display = 'flex';
+      } else {
+        splitHandle.style.display = 'none';
+      }
+    }
+  }
+});
 
 // Hidden file input
 var fileInput = document.createElement('input');
@@ -1176,6 +1613,17 @@ placeholder.addEventListener('dragleave', function(e) {
   e.preventDefault();
   document.getElementById('preview-canvas-container').style.borderColor = '#333';
 });
+
+// 初始化预览区比例
+updatePreviewAspectRatio();
+
+// 初始化预览区和分割线的显示状态
+previewWrap.style.display = 'none';
+var splitHandle = document.getElementById('split-handle');
+if (splitHandle) {
+  splitHandle.style.display = 'none';
+}
+
 placeholder.addEventListener('drop', function(e) {
   e.preventDefault();
   var f = e.dataTransfer.files[0];
@@ -1250,12 +1698,20 @@ async function handleFile(file) {
     setLoadingText('生成效果...');
     setLoadingSubtext('创建个性化调色板');
     document._savedGradients = [];
+    if (palette.length > 0) {
+      selectedBg = palette[0];
+      colorMode = 'solid';
+    }
     renderBgPalette();
-    selectBg(0);
     updateProgress(75);
 
     photoOffsetX = 0;
     photoOffsetY = 0;
+    photoScale = 1;
+    var scaleSlider = document.getElementById('photo-scale-slider');
+    var scaleVal = document.getElementById('photo-scale-val');
+    if (scaleSlider) scaleSlider.value = 1;
+    if (scaleVal) scaleVal.textContent = '100%';
 
     // 并行处理 EXIF 数据，不阻塞主线程
     setLoadingText('优化效果...');
@@ -1370,13 +1826,39 @@ async function handleFile(file) {
     await new Promise(r => setTimeout(r, 300));
 
     loadingEl.style.display = 'none';
-    previewWrap.style.display = 'block';
+    previewWrap.style.display = 'flex';
+    
+    // 控制分割线的显示/隐藏
+    var splitHandle = document.getElementById('split-handle');
+    if (splitHandle) {
+      var isDesktop = window.innerWidth >= 769;
+      if (isDesktop && imgEl) {
+        // 桌面端：只要有图片就显示分割线
+        splitHandle.style.display = 'flex';
+      } else {
+        // 移动端：只在布局面板时显示
+        var activePanel = document.querySelector('.panel-content.active');
+        if (activePanel && activePanel.id === 'ratio-panel' && imgEl) {
+          splitHandle.style.display = 'flex';
+        } else {
+          splitHandle.style.display = 'none';
+        }
+      }
+    }
 
     drawCanvas();
   } catch(err) {
     console.error('handleFile error:', err);
     loadingEl.style.display = 'none';
     placeholder.style.display = '';
+    previewWrap.style.display = 'none';
+    
+    // 隐藏分割线
+    var splitHandle = document.getElementById('split-handle');
+    if (splitHandle) {
+      splitHandle.style.display = 'none';
+    }
+    
     document.getElementById('loading-text').textContent = '处理失败，请重试';
   }
 }
@@ -1395,17 +1877,27 @@ function renderBgPalette() {
     var displayCount = Math.min(5, allColors.length);
     
     for (var i = 0; i < displayCount; i++) {
-      var c = allColors[i];
-      var swatch = document.createElement('div');
-      swatch.className = 'palette-swatch';
-      swatch.style.background = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-      swatch.dataset.index = i;
-      swatch.addEventListener('click', function(e) {
-        var idx = parseInt(e.target.dataset.index);
-        selectBgFromAll(idx);
-        updatePaletteSelection(idx);
-      });
-      row.appendChild(swatch);
+      (function(colorIndex, color) {
+        var swatch = document.createElement('div');
+        swatch.className = 'palette-swatch';
+        swatch.style.background = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+        swatch.onclick = function() {
+          colorMode = 'solid';
+          selectedBg = color;
+          selectedGradient = null;
+          selectedGradientIdx = -1;
+          console.log('Selected solid color:', color);
+          console.log('Before drawCanvas - selectedBg:', selectedBg);
+          drawCanvas();
+          console.log('After drawCanvas - selectedBg:', selectedBg);
+          // 更新选择状态
+          var swatches = row.querySelectorAll('.palette-swatch');
+          swatches.forEach(function(s, i) {
+            s.classList.toggle('selected', i === colorIndex);
+          });
+        };
+        row.appendChild(swatch);
+      })(i, allColors[i]);
     }
   } else {
     // Auto-generated gradients + user saved gradients
@@ -1415,19 +1907,29 @@ function renderBgPalette() {
     // Show up to 5 gradients total
     var displayCount = Math.min(5, allGradients.length);
     for (var i = 0; i < displayCount; i++) {
-      var g = allGradients[i];
-      var swatch = document.createElement('div');
-      swatch.className = 'palette-swatch gradient-swatch';
-      // Use CSS custom properties for gradient colors
-      swatch.style.setProperty('--g-start', 'rgb(' + g.start.r + ',' + g.start.g + ',' + g.start.b + ')');
-      swatch.style.setProperty('--g-end', 'rgb(' + g.end.r + ',' + g.end.g + ',' + g.end.b + ')');
-      swatch.dataset.index = i;
-      swatch.addEventListener('click', function(e) {
-        var idx = parseInt(e.target.dataset.index);
-        selectGradient(allGradients[idx], idx);
-        updateGradientSelection(idx);
-      });
-      row.appendChild(swatch);
+      (function(gradientIndex, gradient) {
+        var swatch = document.createElement('div');
+        swatch.className = 'palette-swatch gradient-swatch';
+        // Use CSS custom properties for gradient colors
+        swatch.style.setProperty('--g-start', 'rgb(' + gradient.start.r + ',' + gradient.start.g + ',' + gradient.start.b + ')');
+        swatch.style.setProperty('--g-end', 'rgb(' + gradient.end.r + ',' + gradient.end.g + ',' + gradient.end.b + ')');
+        swatch.onclick = function() {
+          colorMode = 'gradient';
+          selectedGradient = gradient;
+          selectedGradientIdx = gradientIndex;
+          selectedBg = null;
+          console.log('Selected gradient:', gradient);
+          console.log('Before drawCanvas - selectedGradient:', selectedGradient);
+          drawCanvas();
+          console.log('After drawCanvas - selectedGradient:', selectedGradient);
+          // 更新选择状态
+          var swatches = row.querySelectorAll('.gradient-swatch');
+          swatches.forEach(function(s, i) {
+            s.classList.toggle('selected', i === gradientIndex);
+          });
+        };
+        row.appendChild(swatch);
+      })(i, allGradients[i]);
     }
   }
 
@@ -1469,7 +1971,6 @@ function selectBg(i) {
   selectedBg = palette[i];
   selectedGradient = null;
   selectedGradientIdx = -1;
-  exitPickMode();
   drawCanvas();
   updatePaletteSelection(i);
 }
@@ -1485,9 +1986,11 @@ function selectBgFromAll(idx) {
     selectedBg = allColors[idx];
     selectedGradient = null;
     selectedGradientIdx = -1;
-    exitPickMode();
-    drawCanvas();
-    updatePaletteSelection(idx);
+    // 强制重新绘制
+    setTimeout(function() {
+      drawCanvas();
+      updatePaletteSelection(idx);
+    }, 50);
   }
 }
 
@@ -1496,7 +1999,6 @@ function selectGradient(g, idx) {
   selectedGradient = g;
   selectedGradientIdx = idx;
   selectedBg = null;
-  exitPickMode();
   drawCanvas();
   // Update gradient selection UI
   updateGradientSelection(idx);
@@ -1505,99 +2007,26 @@ function selectGradient(g, idx) {
 
 
 // Picker mode
-function togglePicker() {
-  pickMode ? exitPickMode() : enterPickMode();
-}
 
-function enterPickMode() {
-  if (!imgEl) return;
-  pickMode = true;
-  canvas.classList.add('pick-mode');
-  showPickHint(colorMode === 'gradient' ? '🎨 第 1/2 次：点击图片取渐变起始色' : '🎨 点击图片取色');
-  canvas.addEventListener('click', onCanvasPick, { once: true });
-}
-
-function exitPickMode() {
-  pickMode = false;
-  gradientPickState = null;
-  canvas.classList.remove('pick-mode');
-  hidePickHint();
-  canvas.removeEventListener('click', onCanvasPick);
-}
-
-function showPickHint(text) {
-  var h = document.getElementById('pick-hint');
-  if (!h) {
-    h = document.createElement('div');
-    h.id = 'pick-hint';
-    h.className = 'pick-hint';
-    document.body.appendChild(h);
-  }
-  h.textContent = text;
-  h.classList.add('visible');
-  var rect = canvas.getBoundingClientRect();
-  h.style.left = (rect.left + rect.width / 2) + 'px';
-  h.style.top = (rect.top + 20) + 'px';
-}
-
-function hidePickHint() {
-  var h = document.getElementById('pick-hint');
-  if (h) h.classList.remove('visible');
-}
-
-function onCanvasPick(e) {
-  if (!pickMode) return;
-  var rect = canvas.getBoundingClientRect();
-  var sx = canvas.width / rect.width;
-  var sy = canvas.height / rect.height;
-  var x = Math.round((e.clientX - rect.left) * sx);
-  var y = Math.round((e.clientY - rect.top) * sy);
-  var ctx = canvas.getContext('2d');
-  var tr = 0, tg = 0, tb = 0, cnt = 0;
-  for (var dx = -1; dx <= 1; dx++) {
-    for (var dy = -1; dy <= 1; dy++) {
-      var px = x + dx, py = y + dy;
-      if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-      var dd = ctx.getImageData(px, py, 1, 1).data;
-      tr += dd[0]; tg += dd[1]; tb += dd[2]; cnt++;
-    }
-  }
-  if (cnt > 0) { tr = Math.round(tr / cnt); tg = Math.round(tg / cnt); tb = Math.round(tb / cnt); }
-  var pc = { r: tr, g: tg, b: tb };
-
-  if (colorMode === 'gradient') {
-    if (!gradientPickState) {
-      // First pick - start color
-      gradientPickState = { start: pc };
-      showPickHint('🎨 第 2/2 次：点击图片取渐变结束色');
-      canvas.addEventListener('click', onCanvasPick, { once: true });
-      return;
-    } else {
-      // Second pick - end color, create gradient
-      var g = { start: gradientPickState.start, end: pc };
-      if (!document._savedGradients) document._savedGradients = [];
-      document._savedGradients.push(g);
-      // Re-render palette to show new gradient
-      renderBgPalette();
-      // Select the newly added gradient (it will be at the end)
-      var newIdx = document._savedGradients.length - 1;
-      selectGradient(g, newIdx + buildGradientPairs().length);
-      exitPickMode();
-      return;
-    }
-  }
-
-  exitPickMode();
-  palette.push(pc);
-  selectedBg = pc;
-  renderBgPalette();
-  drawCanvas();
-  updatePaletteSelection(palette.length - 1);
-}
 
 // Draw canvas
 function drawCanvas() {
-  if (!imgEl || (colorMode === 'solid' && !selectedBg) || (colorMode === 'gradient' && !selectedGradient)) return;
+  if (!imgEl) return;
+  // 只有在没有选择任何颜色时才设置默认颜色
+  if (!selectedBg && !selectedGradient) {
+    if (palette.length > 0) {
+      selectedBg = palette[0];
+      colorMode = 'solid';
+      console.log('Set default color:', selectedBg);
+    } else {
+      return;
+    }
+  }
+  console.log('drawCanvas called with:', {
+    colorMode: colorMode,
+    selectedBg: selectedBg,
+    selectedGradient: selectedGradient
+  });
   var rat = ratioMap[currentRatio];
   var W = 1080, H = Math.round(W / rat);
   canvas.width = W;
@@ -1606,15 +2035,45 @@ function drawCanvas() {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Photo area (calculate first to know background height)
-  var photoH = Math.round(H * photoRatio);
-  var photoY = H - photoH;
+  // Photo area (calculate first to know background size)
+  var photoSize, photoX, photoY, bgSize, bgX, bgY;
+  
+  if (currentLayout === 'bottom' || currentLayout === 'top') {
+    // 上下布局
+    photoSize = Math.round(H * photoRatio); // 使用photoRatio
+    photoY = currentLayout === 'bottom' ? H - photoSize : 0;
+    photoX = 0;
+    bgSize = H - photoSize;
+    bgY = currentLayout === 'bottom' ? 0 : photoSize;
+    bgX = 0;
+  } else {
+    // 左右布局
+    photoSize = Math.round(W * photoRatio); // 使用photoRatio
+    photoX = currentLayout === 'right' ? W - photoSize : 0;
+    photoY = 0;
+    bgSize = W - photoSize;
+    bgX = currentLayout === 'right' ? 0 : photoSize;
+    bgY = 0;
+  }
 
   // Background
   if (colorMode === 'gradient' && selectedGradient) {
-    // Gradient extends beyond background area for smoother transition
-    var gradientHeight = Math.min(800, Math.round(photoY * 2));
-    var grad = ctx.createLinearGradient(0, 0, 0, gradientHeight);
+    var grad;
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      // 上下布局 - 垂直渐变
+      if (currentLayout === 'bottom') {
+        grad = ctx.createLinearGradient(0, bgY, 0, bgY + bgSize);
+      } else {
+        grad = ctx.createLinearGradient(0, bgY, 0, bgY + bgSize);
+      }
+    } else {
+      // 左右布局 - 水平渐变
+      if (currentLayout === 'left') {
+        grad = ctx.createLinearGradient(bgX, 0, bgX + bgSize, 0);
+      } else {
+        grad = ctx.createLinearGradient(bgX, 0, bgX + bgSize, 0);
+      }
+    }
     var s = selectedGradient.start, e = selectedGradient.end;
     // More color stops for smoother, more natural gradient
     grad.addColorStop(0, 'rgb(' + s.r + ',' + s.g + ',' + s.b + ')');
@@ -1623,24 +2082,91 @@ function drawCanvas() {
     grad.addColorStop(0.75, 'rgb(' + Math.round(s.r * 0.25 + e.r * 0.75) + ',' + Math.round(s.g * 0.25 + e.g * 0.75) + ',' + Math.round(s.b * 0.25 + e.b * 0.75) + ')');
     grad.addColorStop(1, 'rgb(' + e.r + ',' + e.g + ',' + e.b + ')');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, photoY);
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      // 上下布局
+      ctx.fillRect(bgX, bgY, W, bgSize);
+    } else {
+      // 左右布局
+      ctx.fillRect(bgX, bgY, bgSize, H);
+    }
   } else if (selectedBg) {
     ctx.fillStyle = 'rgb(' + selectedBg.r + ',' + selectedBg.g + ',' + selectedBg.b + ')';
-    ctx.fillRect(0, 0, W, photoY);
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      // 上下布局
+      ctx.fillRect(bgX, bgY, W, bgSize);
+    } else {
+      // 左右布局
+      ctx.fillRect(bgX, bgY, bgSize, H);
+    }
   }
 
-  // Cover-crop with offsets
+  // Cover-crop with offsets and scale
   var ir = imgEl.naturalWidth / imgEl.naturalHeight;
-  var tr = W / photoH;
-  var sw = imgEl.naturalWidth, sh = imgEl.naturalHeight;
-  if (ir > tr) sw = Math.round(imgEl.naturalHeight * tr);
-  else sh = Math.round(imgEl.naturalWidth / tr);
-  var sx = Math.round((imgEl.naturalWidth - sw) / 2);
-  var sy = Math.round((imgEl.naturalHeight - sh) / 2);
-  var maxX = imgEl.naturalWidth - sw, maxY = imgEl.naturalHeight - sh;
-  if (maxX > 0) { sx += Math.round(maxX * photoOffsetX * 0.5); sx = Math.max(0, Math.min(maxX, sx)); }
-  if (maxY > 0) { sy += Math.round(maxY * photoOffsetY * 0.5); sy = Math.max(0, Math.min(maxY, sy)); }
-  ctx.drawImage(imgEl, sx, sy, sw, sh, 0, photoY, W, photoH);
+  var tr;
+  var photoW, photoH;
+  
+  if (currentLayout === 'bottom' || currentLayout === 'top') {
+    // 上下布局
+    photoW = W;
+    photoH = photoSize;
+    tr = photoW / photoH;
+  } else {
+    // 左右布局
+    photoW = photoSize;
+    photoH = H;
+    tr = photoW / photoH;
+  }
+  
+  // 先填充整个照片区域的背景色
+  if (colorMode === 'gradient' && selectedGradient) {
+    var grad;
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      grad = ctx.createLinearGradient(photoX, photoY, photoX, photoY + photoH);
+    } else {
+      grad = ctx.createLinearGradient(photoX, photoY, photoX + photoW, photoY);
+    }
+    var s = selectedGradient.start, e = selectedGradient.end;
+    grad.addColorStop(0, 'rgb(' + s.r + ',' + s.g + ',' + s.b + ')');
+    grad.addColorStop(0.25, 'rgb(' + Math.round(s.r * 0.75 + e.r * 0.25) + ',' + Math.round(s.g * 0.75 + e.g * 0.25) + ',' + Math.round(s.b * 0.75 + e.b * 0.25) + ')');
+    grad.addColorStop(0.5, 'rgb(' + Math.round((s.r + e.r) / 2) + ',' + Math.round((s.g + e.g) / 2) + ',' + Math.round((s.b + e.b) / 2) + ')');
+    grad.addColorStop(0.75, 'rgb(' + Math.round(s.r * 0.25 + e.r * 0.75) + ',' + Math.round(s.g * 0.25 + e.g * 0.75) + ',' + Math.round(s.b * 0.25 + e.b * 0.75) + ')');
+    grad.addColorStop(1, 'rgb(' + e.r + ',' + e.g + ',' + e.b + ')');
+    ctx.fillStyle = grad;
+  } else if (selectedBg) {
+    ctx.fillStyle = 'rgb(' + selectedBg.r + ',' + selectedBg.g + ',' + selectedBg.b + ')';
+  }
+  ctx.fillRect(photoX, photoY, photoW, photoH);
+  
+  // 计算缩放和裁剪（只允许放大）
+  var sw, sh, sx, sy, dw, dh, dx, dy;
+  
+  // 只处理放大或100%的情况
+  if (ir > tr) {
+    sh = imgEl.naturalHeight / photoScale;
+    sw = sh * tr;
+  } else {
+    sw = imgEl.naturalWidth / photoScale;
+    sh = sw / tr;
+  }
+  
+  // 裁剪起始位置
+  sx = (imgEl.naturalWidth - sw) / 2;
+  sy = (imgEl.naturalHeight - sh) / 2;
+  
+  // 应用偏移
+  var maxX = imgEl.naturalWidth - sw;
+  var maxY = imgEl.naturalHeight - sh;
+  if (maxX > 0) { sx += maxX * photoOffsetX * 0.5; sx = Math.max(0, Math.min(maxX, sx)); }
+  if (maxY > 0) { sy += maxY * photoOffsetY * 0.5; sy = Math.max(0, Math.min(maxY, sy)); }
+  
+  // 绘制尺寸填满整个区域
+  dw = photoW;
+  dh = photoH;
+  dx = photoX;
+  dy = photoY;
+  
+  // 绘制图片
+  ctx.drawImage(imgEl, sx, sy, sw, sh, dx, dy, dw, dh);
 
   // Text - build caption from location, time, and custom input based on switches
   var customCaption = showCustom ? document.getElementById('caption-input').value.trim() : '';
@@ -1654,20 +2180,30 @@ function drawCanvas() {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   var baseTextHW = (fontStyle === 'handwriting' ? W * 0.039 : W * 0.036) * userFontScale;
-  var textY = photoY / 2;
+  var textX, textY;
+  
+  if (currentLayout === 'bottom' || currentLayout === 'top') {
+    // 上下布局
+    textX = W / 2;
+    textY = currentLayout === 'bottom' ? bgY + bgSize / 2 : bgY + bgSize / 2;
+  } else {
+    // 左右布局
+    textX = bgX + bgSize / 2;
+    textY = H / 2;
+  }
 
   if (caption) {
     ctx.fillStyle = selectedTextColor;
     ctx.letterSpacing = userLetterSpacing + 'px';
     if (fontStyle === 'handwriting') {
       ctx.font = '300 ' + Math.round(baseTextHW) + "px Georgia,'Times New Roman','STSong',serif";
-      ctx.fillText(caption, W / 2, textY);
+      ctx.fillText(caption, textX, textY);
     } else if (fontStyle === 'modern') {
       ctx.font = '500 ' + Math.round(baseTextHW) + "px -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif";
-      ctx.fillText(caption, W / 2, textY);
+      ctx.fillText(caption, textX, textY);
     } else {
       ctx.font = '400 ' + Math.round(baseTextHW) + "px 'Courier New',Courier,Consolas,monospace";
-      ctx.fillText(caption, W / 2, textY);
+      ctx.fillText(caption, textX, textY);
     }
   } else {
     // Show placeholder when no content
@@ -1687,31 +2223,49 @@ function drawCanvas() {
       fm = "'Courier New',Courier,Consolas,monospace";
     }
     ctx.font = ph + Math.round(baseTextHW) + 'px ' + fm;
-    ctx.fillText('Location, Time', W / 2, textY);
+    ctx.fillText('Location, Time', textX, textY);
   }
 
-  // Retro noise overlay - only apply to background area (above photo)
+  // Retro noise overlay - only apply to background area
   if (noiseEnabled) {
-    var bgHeight = photoY;
-    if (bgHeight > 0) {
-      var imgData = ctx.getImageData(0, 0, W, bgHeight), d = imgData.data;
-      for (var ni = 0; ni < d.length; ni += 4) {
-        var n = Math.random() * 18 - 9;
-        d[ni] = Math.min(255, Math.max(0, d[ni] + n));
-        d[ni + 1] = Math.min(255, Math.max(0, d[ni + 1] + n));
-        d[ni + 2] = Math.min(255, Math.max(0, d[ni + 2] + n));
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      // 上下布局 - 背景区域
+      var bgHeight = bgSize;
+      if (bgHeight > 0) {
+        var imgData = ctx.getImageData(bgX, bgY, W, bgHeight), d = imgData.data;
+        for (var ni = 0; ni < d.length; ni += 4) {
+          var n = Math.random() * 18 - 9;
+          d[ni] = Math.min(255, Math.max(0, d[ni] + n));
+          d[ni + 1] = Math.min(255, Math.max(0, d[ni + 1] + n));
+          d[ni + 2] = Math.min(255, Math.max(0, d[ni + 2] + n));
+        }
+        ctx.putImageData(imgData, bgX, bgY);
       }
-      ctx.putImageData(imgData, 0, 0);
+    } else {
+      // 左右布局 - 背景区域
+      var bgWidth = bgSize;
+      if (bgWidth > 0) {
+        var imgData = ctx.getImageData(bgX, bgY, bgWidth, H), d = imgData.data;
+        for (var ni = 0; ni < d.length; ni += 4) {
+          var n = Math.random() * 18 - 9;
+          d[ni] = Math.min(255, Math.max(0, d[ni] + n));
+          d[ni + 1] = Math.min(255, Math.max(0, d[ni + 1] + n));
+          d[ni + 2] = Math.min(255, Math.max(0, d[ni + 2] + n));
+        }
+        ctx.putImageData(imgData, bgX, bgY);
+      }
     }
   }
 }
 
-// Drag: photo position + split handle
+// Drag: photo position + split handle + pinch zoom
 (function() {
   var wrap = document.getElementById('preview-wrap');
   var handle = document.getElementById('split-handle');
   var hint = document.getElementById('drag-hint');
   var splitD = false, photoD = false, lx = 0, ly = 0;
+  var initialPinchDistance = 0;
+  var initialPhotoScale = 1;
 
   canvas.addEventListener('mouseenter', function() {
     hint.classList.add('visible');
@@ -1720,28 +2274,85 @@ function drawCanvas() {
 
   function posHandle() {
     if (!canvas.width) return;
-    var ph = canvas.height * photoRatio;
-    var py = canvas.height - ph;
-    var dh = canvas.getBoundingClientRect().height;
-    var r = dh / canvas.height;
-    handle.style.top = (py * r - 12) + 'px';
+    var canvasRect = canvas.getBoundingClientRect();
+    var wrapRect = wrap.getBoundingClientRect();
+    
+    // 计算 canvas 相对于 wrap 的位置
+    var canvasLeft = canvasRect.left - wrapRect.left;
+    var canvasTop = canvasRect.top - wrapRect.top;
+    var canvasWidth = canvasRect.width;
+    var canvasHeight = canvasRect.height;
+    
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      // 上下布局 - 垂直分割线
+      var ph = canvasHeight * photoRatio;
+      var py;
+      if (currentLayout === 'top') {
+        // 原图在上，分割线在照片下方
+        py = ph;
+      } else {
+        // 原图在下，分割线在照片上方
+        py = canvasHeight - ph;
+      }
+      handle.style.top = (canvasTop + py - 12) + 'px';
+      handle.style.left = canvasLeft + 'px';
+      handle.style.width = canvasWidth + 'px';
+      handle.style.height = '24px';
+      handle.style.cursor = 'ns-resize';
+      // 水平图标
+      handle.style.flexDirection = 'row';
+      handle.classList.remove('vertical');
+    } else {
+      // 左右布局 - 水平分割线
+      var pw = canvasWidth * photoRatio;
+      var px;
+      if (currentLayout === 'right') {
+        // 原图在右，分割线在左侧
+        px = canvasWidth - pw;
+      } else {
+        // 原图在左，分割线在右侧
+        px = pw;
+      }
+      handle.style.left = (canvasLeft + px - 12) + 'px';
+      handle.style.top = canvasTop + 'px';
+      handle.style.width = '24px';
+      handle.style.height = canvasHeight + 'px';
+      handle.style.cursor = 'ew-resize';
+      // 垂直图标
+      handle.style.flexDirection = 'column';
+      handle.classList.add('vertical');
+    }
     
     // Check if handle is at center (50%)
     var isCenter = Math.abs(photoRatio - 0.5) < 0.02;
     handle.classList.toggle('at-center', isCenter);
   }
 
+  function getPinchDistance(touches) {
+    var dx = touches[0].clientX - touches[1].clientX;
+    var dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   // Photo drag
   canvas.addEventListener('mousedown', function(e) { e.preventDefault(); photoD = true; canvas.classList.add('photo-dragging'); lx = e.clientX; ly = e.clientY; });
   canvas.addEventListener('touchstart', function(e) { 
-    e.preventDefault(); 
-    photoD = true; 
-    canvas.classList.add('photo-dragging'); 
-    lx = e.touches[0].clientX; 
-    ly = e.touches[0].clientY; 
-    // 添加触摸反馈
-    canvas.style.transform = 'scale(0.98)';
-    canvas.style.transition = 'transform 0.1s ease';
+    e.preventDefault();
+    if (e.touches.length === 2) {
+      // 双指捏合缩放
+      initialPinchDistance = getPinchDistance(e.touches);
+      initialPhotoScale = photoScale;
+      photoD = false;
+    } else if (e.touches.length === 1) {
+      // 单指移动
+      photoD = true; 
+      canvas.classList.add('photo-dragging'); 
+      lx = e.touches[0].clientX; 
+      ly = e.touches[0].clientY; 
+      // 添加触摸反馈
+      canvas.style.transform = 'scale(0.98)';
+      canvas.style.transition = 'transform 0.1s ease';
+    }
   }, { passive: false });
   document.addEventListener('mousemove', function(e) {
     if (!photoD) return;
@@ -1756,21 +2367,34 @@ function drawCanvas() {
     posHandle();
   });
   document.addEventListener('touchmove', function(e) {
-    if (!photoD) return;
-    e.preventDefault();
-    var rect = canvas.getBoundingClientRect();
-    var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
-    // 优化触摸滑动的平滑度
-    var deltaX = (tx - lx) / rect.width * 2;
-    var deltaY = (ty - ly) / rect.height * 2;
-    // 添加惯性效果
-    photoOffsetX += deltaX * 0.8;
-    photoOffsetY += deltaY * 0.8;
-    photoOffsetX = Math.max(-1, Math.min(1, photoOffsetX));
-    photoOffsetY = Math.max(-1, Math.min(1, photoOffsetY));
-    lx = tx; ly = ty;
-    drawCanvas();
-    posHandle();
+    if (e.touches.length === 2 || (e.touches.length === 1 && photoD)) {
+      e.preventDefault();
+    }
+    if (e.touches.length === 2) {
+      // 双指捏合缩放
+      var currentDistance = getPinchDistance(e.touches);
+      if (initialPinchDistance > 0) {
+        var scaleFactor = currentDistance / initialPinchDistance;
+        photoScale = Math.max(1, Math.min(2, initialPhotoScale * scaleFactor));
+        drawCanvas();
+        posHandle();
+      }
+    } else if (e.touches.length === 1 && photoD) {
+      // 单指移动
+      var rect = canvas.getBoundingClientRect();
+      var tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+      // 优化触摸滑动的平滑度
+      var deltaX = (tx - lx) / rect.width * 2;
+      var deltaY = (ty - ly) / rect.height * 2;
+      // 添加惯性效果
+      photoOffsetX += deltaX * 0.8;
+      photoOffsetY += deltaY * 0.8;
+      photoOffsetX = Math.max(-1, Math.min(1, photoOffsetX));
+      photoOffsetY = Math.max(-1, Math.min(1, photoOffsetY));
+      lx = tx; ly = ty;
+      drawCanvas();
+      posHandle();
+    }
   }, { passive: false });
   document.addEventListener('mouseup', function() { 
     if (photoD) { 
@@ -1786,9 +2410,9 @@ function drawCanvas() {
       canvas.classList.remove('photo-dragging');
       // 重置触摸反馈
       canvas.style.transform = 'scale(1)';
-    } 
+    }
+    initialPinchDistance = 0;
   });
-  document.addEventListener('mouseup', function() { if (photoD) { photoD = false; canvas.classList.remove('photo-dragging'); } });
   document.addEventListener('touchend', function() { if (photoD) { photoD = false; canvas.classList.remove('photo-dragging'); } });
 
   // Split handle
@@ -1798,9 +2422,31 @@ function drawCanvas() {
     if (!splitD) return;
     e.preventDefault();
     var rect = canvas.getBoundingClientRect();
-    var cy = e.clientY, sy = canvas.height / rect.height;
-    var y = (cy - rect.top) * sy;
-    photoRatio = Math.max(0.15, Math.min(0.85, (canvas.height - y) / canvas.height));
+    
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      // 上下布局 - 垂直拖动
+      var cy = e.clientY, sy = canvas.height / rect.height;
+      var y = (cy - rect.top) * sy;
+      if (currentLayout === 'top') {
+        // 原图在上，比例是上方部分
+        photoRatio = Math.max(0.15, Math.min(0.85, y / canvas.height));
+      } else {
+        // 原图在下，比例是下方部分
+        photoRatio = Math.max(0.15, Math.min(0.85, (canvas.height - y) / canvas.height));
+      }
+    } else {
+      // 左右布局 - 水平拖动
+      var cx = e.clientX, sx = canvas.width / rect.width;
+      var x = (cx - rect.left) * sx;
+      if (currentLayout === 'right') {
+        // 原图在右，比例是右侧部分
+        photoRatio = Math.max(0.15, Math.min(0.85, (canvas.width - x) / canvas.width));
+      } else {
+        // 原图在左，比例是左侧部分
+        photoRatio = Math.max(0.15, Math.min(0.85, x / canvas.width));
+      }
+    }
+    
     drawCanvas();
     posHandle();
   });
@@ -1808,9 +2454,31 @@ function drawCanvas() {
     if (!splitD) return;
     e.preventDefault();
     var rect = canvas.getBoundingClientRect();
-    var cy = e.touches[0].clientY, sy = canvas.height / rect.height;
-    var y = (cy - rect.top) * sy;
-    photoRatio = Math.max(0.15, Math.min(0.85, (canvas.height - y) / canvas.height));
+    
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      // 上下布局 - 垂直拖动
+      var cy = e.touches[0].clientY, sy = canvas.height / rect.height;
+      var y = (cy - rect.top) * sy;
+      if (currentLayout === 'top') {
+        // 原图在上，比例是上方部分
+        photoRatio = Math.max(0.15, Math.min(0.85, y / canvas.height));
+      } else {
+        // 原图在下，比例是下方部分
+        photoRatio = Math.max(0.15, Math.min(0.85, (canvas.height - y) / canvas.height));
+      }
+    } else {
+      // 左右布局 - 水平拖动
+      var cx = e.touches[0].clientX, sx = canvas.width / rect.width;
+      var x = (cx - rect.left) * sx;
+      if (currentLayout === 'right') {
+        // 原图在右，比例是右侧部分
+        photoRatio = Math.max(0.15, Math.min(0.85, (canvas.width - x) / canvas.width));
+      } else {
+        // 原图在左，比例是左侧部分
+        photoRatio = Math.max(0.15, Math.min(0.85, x / canvas.width));
+      }
+    }
+    
     drawCanvas();
     posHandle();
   }, { passive: false });
@@ -1823,10 +2491,235 @@ function drawCanvas() {
 
 // Download
 function doDownload() {
+  // 检测设备类型
+  var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  var isAndroid = /Android/i.test(navigator.userAgent);
+  var isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    // 移动端下载逻辑
+    canvas.toBlob(function(blob) {
+      if (blob) {
+        if (isWeChat) {
+          // 微信内环境特殊处理
+          weChatDownload(blob, isIOS, isAndroid);
+        } else if (navigator.share && navigator.canShare) {
+          // 优先使用 Web Share API (iOS 12+, Android 6+)
+          var file = new File([blob], 'colorwalk_' + Date.now() + '.png', { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            navigator.share({
+              title: 'ColorWalk',
+              text: 'My ColorWalk creation',
+              files: [file]
+            }).catch(function(error) {
+              console.log('Share failed:', error);
+              // 回退到平台特定的下载方法
+              if (isIOS) {
+                iosDownload(blob);
+              } else if (isAndroid) {
+                androidDownload(blob);
+              } else {
+                fallbackDownload(blob);
+              }
+            });
+          } else {
+            // canShare 不支持文件，回退到平台特定的下载方法
+            if (isIOS) {
+              iosDownload(blob);
+            } else if (isAndroid) {
+              androidDownload(blob);
+            } else {
+              fallbackDownload(blob);
+            }
+          }
+        } else {
+          // 根据平台选择不同的下载方法
+          if (isIOS) {
+            iosDownload(blob);
+          } else if (isAndroid) {
+            androidDownload(blob);
+          } else {
+            fallbackDownload(blob);
+          }
+        }
+      }
+    }, 'image/png');
+  } else {
+    // 桌面端下载逻辑
+    var a = document.createElement('a');
+    a.download = 'colorwalk_' + Date.now() + '.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  }
+}
+
+function iosDownload(blob) {
+  // iOS 设备的下载方法
+  var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
+  a.href = url;
   a.download = 'colorwalk_' + Date.now() + '.png';
-  a.href = canvas.toDataURL('image/png');
+  // iOS 设备需要特殊处理
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  // 触发点击事件
+  var event = document.createEvent('MouseEvents');
+  event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+  a.dispatchEvent(event);
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function androidDownload(blob) {
+  // Android 设备的下载方法
+  var url = URL.createObjectURL(blob);
+  
+  // 方法1：直接尝试使用浏览器下载
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'colorwalk_' + Date.now() + '.png';
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
+  
+  // 方法2：如果方法1失败，尝试在新窗口打开
+  setTimeout(function() {
+    try {
+      var win = window.open(url, '_blank');
+      if (!win) {
+        // 如果新窗口被阻止，尝试使用 location.href
+        window.location.href = url;
+      }
+    } catch(e) {
+      console.log('Android download fallback failed:', e);
+    }
+  }, 100);
+  
+  // 清理 URL
+  setTimeout(function() {
+    URL.revokeObjectURL(url);
+  }, 10000);
+}
+
+function weChatDownload(blob, isIOS, isAndroid) {
+  // 微信内环境的下载方法
+  // 直接使用canvas.toDataURL()避免跨域问题
+  var url = canvas.toDataURL('image/png');
+  
+  // 创建一个新的图片元素
+  var img = new Image();
+  img.src = url;
+  img.onload = function() {
+    // 创建一个全屏遮罩
+    var overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.right = '0';
+    overlay.style.bottom = '0';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+    overlay.style.zIndex = '9999';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.padding = '20px';
+    
+    // 创建标题栏
+    var header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.justifyContent = 'space-between';
+    header.style.width = '100%';
+    header.style.maxWidth = '400px';
+    header.style.marginBottom = '20px';
+    
+    // 标题
+    var title = document.createElement('h3');
+    title.style.color = '#fff';
+    title.style.fontSize = '16px';
+    title.style.fontWeight = '500';
+    title.style.margin = '0';
+    title.textContent = 'ColorWalk';
+    header.appendChild(title);
+    
+    // 关闭按钮
+    var closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '×';
+    closeBtn.style.background = 'none';
+    closeBtn.style.border = 'none';
+    closeBtn.style.color = '#fff';
+    closeBtn.style.fontSize = '24px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.padding = '0';
+    closeBtn.style.width = '30px';
+    closeBtn.style.height = '30px';
+    closeBtn.style.display = 'flex';
+    closeBtn.style.alignItems = 'center';
+    closeBtn.style.justifyContent = 'center';
+    closeBtn.addEventListener('click', function() {
+      document.body.removeChild(overlay);
+      URL.revokeObjectURL(url);
+    });
+    header.appendChild(closeBtn);
+    
+    overlay.appendChild(header);
+    
+    // 创建图片容器
+    var imgContainer = document.createElement('div');
+    imgContainer.style.width = '100%';
+    imgContainer.style.maxWidth = '400px';
+    imgContainer.style.display = 'flex';
+    imgContainer.style.flexDirection = 'column';
+    imgContainer.style.alignItems = 'center';
+    imgContainer.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
+    
+    // 添加图片
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '70vh';
+    img.style.objectFit = 'contain';
+    img.style.display = 'block';
+    imgContainer.appendChild(img);
+    
+    // 添加提示文字
+    var hint = document.createElement('div');
+    hint.style.backgroundColor = '#333';
+    hint.style.color = '#fff';
+    hint.style.textAlign = 'center';
+    hint.style.padding = '16px';
+    hint.style.fontSize = '14px';
+    hint.style.lineHeight = '1.5';
+    hint.textContent = '长按图片保存到相册';
+    imgContainer.appendChild(hint);
+    
+    overlay.appendChild(imgContainer);
+    
+    // 添加到页面
+    document.body.appendChild(overlay);
+    
+    // 点击遮罩关闭
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) {
+        document.body.removeChild(overlay);
+        URL.revokeObjectURL(url);
+      }
+    });
+  };
+}
+
+function fallbackDownload(blob) {
+  // 通用回退下载方法
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'colorwalk_' + Date.now() + '.png';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 downloadHeaderBtn.addEventListener('click', doDownload);
 
@@ -1856,7 +2749,6 @@ var gradientPickerState = { start: null, end: null, activeTarget: 'start' };
       // 渐变模式：显示两个颜色选择
       popover.innerHTML =
         '<div class="cp-header">' +
-          '<button class="cp-pick-btn" id="cp-pick-from-canvas" title="从图片取色"><svg viewBox="0 0 20 20" fill="none"><path d="M13.5 2.5a2.121 2.121 0 0 1 3 3l-1.5 1.5-3-3 1.5-1.5z" stroke="currentColor" stroke-width="1.4"/><path d="M12 4 4.5 11.5l-.5 3.5 3.5-.5L15 7" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="15.5" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg></button>' +
           '<div class="cp-input-wrap">' +
             '<div class="cp-label">自定义颜色</div>' +
             '<input type="color" id="cp-color-input" value="#ffffff"/>' +
@@ -1878,6 +2770,16 @@ var gradientPickerState = { start: null, end: null, activeTarget: 'start' };
         '<div class="cp-presets" id="cp-presets"></div>' +
         '<button class="cp-confirm-btn" id="cp-confirm-gradient" disabled>确认添加渐变</button>';
       
+      // 移除取色相关的事件监听器
+      try {
+        var pickBtn = document.getElementById('cp-pick-from-canvas');
+        if (pickBtn) {
+          pickBtn.remove();
+        }
+      } catch(e) {
+        console.log('移除取色按钮失败:', e);
+      }
+      
       popover.classList.add('gradient-mode');
       
       // 绑定渐变颜色选择事件
@@ -1897,7 +2799,6 @@ var gradientPickerState = { start: null, end: null, activeTarget: 'start' };
       // 单色模式：原始布局
       popover.innerHTML =
         '<div class="cp-header">' +
-          '<button class="cp-pick-btn" id="cp-pick-from-canvas" title="从图片取色"><svg viewBox="0 0 20 20" fill="none"><path d="M13.5 2.5a2.121 2.121 0 0 1 3 3l-1.5 1.5-3-3 1.5-1.5z" stroke="currentColor" stroke-width="1.4"/><path d="M12 4 4.5 11.5l-.5 3.5 3.5-.5L15 7" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="15.5" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg></button>' +
           '<div class="cp-preview" id="cp-preview"></div>' +
           '<div class="cp-input-wrap">' +
             '<div class="cp-label">自定义颜色</div>' +
@@ -1906,24 +2807,22 @@ var gradientPickerState = { start: null, end: null, activeTarget: 'start' };
         '</div>' +
         '<div class="cp-presets" id="cp-presets"></div>';
       
+      // 移除取色相关的事件监听器
+      try {
+        var pickBtn = document.getElementById('cp-pick-from-canvas');
+        if (pickBtn) {
+          pickBtn.remove();
+        }
+      } catch(e) {
+        console.log('移除取色按钮失败:', e);
+      }
+      
       popover.classList.remove('gradient-mode');
     }
     
     // 绑定通用事件
     document.getElementById('cp-color-input').addEventListener('input', function(e) {
       onColorInput(e.target.value);
-    });
-    
-    document.getElementById('cp-pick-from-canvas').addEventListener('click', function() {
-      if (!imgEl) return;
-      this.classList.add('active');
-      canvas.classList.add('pick-mode');
-      var hint = colorMode === 'gradient' && currentTarget === 'bg' 
-        ? (gradientPickerState.activeTarget === 'start' ? '🎨 点击取起始色' : '🎨 点击取结束色')
-        : '🎨 点击图片取色';
-      showPickHint(hint);
-      canvas.addEventListener('click', onPopoverCanvasPick, { once: true });
-      hidePopover();
     });
   }
 
@@ -2027,44 +2926,11 @@ var gradientPickerState = { start: null, end: null, activeTarget: 'start' };
       palette.push(c);
       renderBgPalette();
       updatePaletteSelection(palette.length - 1);
-      exitPickMode();
       drawCanvas();
     } else {
       selectedTextColor = 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0.9)';
       drawCanvas();
     }
-  }
-
-  function onPopoverCanvasPick(e) {
-    document.getElementById('cp-pick-from-canvas').classList.remove('active');
-    var ctx = canvas.getContext('2d');
-    var rect = canvas.getBoundingClientRect();
-    var sx = (e.clientX - rect.left) / rect.width * canvas.width;
-    var sy = (e.clientY - rect.top) / rect.height * canvas.height;
-    var d = ctx.getImageData(Math.round(sx) - 1, Math.round(sy) - 1, 3, 3).data;
-    var tr = 0, tg = 0, tb = 0, n = 0;
-    for (var i = 0; i < d.length; i += 4) { if (d[i + 3] >= 128) { tr += d[i]; tg += d[i + 1]; tb += d[i + 2]; n++; } }
-    if (n > 0) { tr = Math.round(tr / n); tg = Math.round(tg / n); tb = Math.round(tb / n); }
-    var hex = rgbToHex(tr, tg, tb);
-    
-    if (colorMode === 'gradient' && currentTarget === 'bg') {
-      gradientPickerState[gradientPickerState.activeTarget] = { r: tr, g: tg, b: tb };
-      // 自动切换到下一个
-      if (gradientPickerState.activeTarget === 'start' && !gradientPickerState.end) {
-        gradientPickerState.activeTarget = 'end';
-      }
-      showPopover('bg');
-    } else {
-      applyColorFromHex(hex);
-    }
-    
-    var colorInput = document.getElementById('cp-color-input');
-    if (colorInput) colorInput.value = hex;
-    
-    var preview = document.getElementById('cp-preview');
-    if (preview) preview.style.background = hex;
-    
-    hidePickHint();
   }
 
   function showPopover(target) {
@@ -2113,12 +2979,14 @@ var gradientPickerState = { start: null, end: null, activeTarget: 'start' };
 
     setTimeout(function() {
       document.addEventListener('mousedown', closeOnOutside);
+      document.addEventListener('touchstart', closeOnOutside, { passive: false });
     }, 0);
   }
 
   function hidePopover() {
     if (popover) popover.classList.remove('visible');
     document.removeEventListener('mousedown', closeOnOutside);
+    document.removeEventListener('touchstart', closeOnOutside);
   }
 
   function closeOnOutside(e) {
@@ -2148,13 +3016,22 @@ document.getElementById('mode-tabs').addEventListener('click', function(e) {
   document.querySelectorAll('.mode-tab').forEach(function(t) { t.classList.remove('active'); });
   tab.classList.add('active');
   colorMode = tab.dataset.mode;
+  console.log('Mode changed to:', colorMode);
   renderBgPalette();
-  if (colorMode === 'solid' && !selectedBg && palette.length > 0) selectBg(0);
-  else if (colorMode === 'gradient' && !selectedGradient) {
+  // 只有在当前模式下没有选择颜色时才设置默认颜色
+  if (colorMode === 'solid' && !selectedBg && palette.length > 0) {
+    console.log('Setting default solid color');
+    selectBg(0);
+  } else if (colorMode === 'gradient' && !selectedGradient) {
     var pairs = buildGradientPairs();
-    if (pairs.length > 0) selectGradient(pairs[0], 0);
+    if (pairs.length > 0) {
+      console.log('Setting default gradient');
+      selectGradient(pairs[0], 0);
+    }
+  } else {
+    console.log('Using existing color selection');
+    drawCanvas();
   }
-  else drawCanvas();
 });
 
 document.getElementById('font-row').addEventListener('click', function(e) {
@@ -2181,17 +3058,46 @@ document.getElementById('text-color-row').addEventListener('click', function(e) 
   if (rgbMatch) {
     var r = parseInt(rgbMatch[1]), g = parseInt(rgbMatch[2]), b = parseInt(rgbMatch[3]);
     selectedTextColor = 'rgba(' + r + ',' + g + ',' + b + ',0.9)';
+    // 确保背景模式保持不变
+    if (colorMode === 'solid' && !selectedBg && palette.length > 0) {
+      selectedBg = palette[0];
+    }
     drawCanvas();
   }
 });
 
+function updatePreviewAspectRatio() {
+  var container = document.getElementById('preview-canvas-container');
+  var rat = ratioMap[currentRatio];
+  container.style.aspectRatio = rat;
+}
+
 document.getElementById('ratio-row').addEventListener('click', function(e) {
   var b = e.target.closest('.ratio-btn');
   if (!b) return;
-  document.querySelectorAll('.ratio-btn').forEach(function(r) { r.classList.remove('active'); });
+  document.querySelectorAll('#ratio-row .ratio-btn').forEach(function(r) { r.classList.remove('active'); });
   b.classList.add('active');
   currentRatio = b.dataset.ratio;
+  // 切换画幅比例时重置比例为 50-50
+  photoRatio = 0.5;
+  updatePreviewAspectRatio();
   drawCanvas();
+  posHandle();
+});
+
+document.getElementById('layout-row').addEventListener('click', function(e) {
+  var b = e.target.closest('.ratio-btn');
+  if (!b) return;
+  document.querySelectorAll('#layout-row .ratio-btn').forEach(function(r) { r.classList.remove('active'); });
+  b.classList.add('active');
+  currentLayout = b.dataset.layout;
+  // 切换布局时重置比例为 50-50
+  photoRatio = 0.5;
+  // 强制重新计算分割线位置
+  setTimeout(function() {
+    drawCanvas();
+    posHandle();
+  }, 100);
 });
 
 document.getElementById('noise-toggle').addEventListener('change', function() {
