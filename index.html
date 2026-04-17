@@ -532,6 +532,22 @@
       z-index: 5;
     }
     .photo-drag-hint.visible { opacity: 1; }
+    
+    /* 文字输入提示 */
+    .text-input-hint {
+      position: absolute;
+      font-size: 14px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 1px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 5;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .text-input-hint.visible {
+      opacity: 1;
+    }
     .split-handle {
       position: absolute;
       left: 0;
@@ -1174,13 +1190,12 @@
       <button class="welcome-modal-close">&times;</button>
     </div>
     <div class="welcome-modal-body">
-      <p class="welcome-date">20260414</p>
+      <p class="welcome-date">20260417</p>
       <ul class="welcome-features">
-        <li>修复已知问题，下拉更流畅</li>
-        <li>优化编辑交互，使用更简单</li>
-        <li>丰富图片布局，创作更有趣</li>
+        <li>自定义文字支持换行</li>
+        <li>修复一些已知问题</li>
       </ul>
-      <p class="welcome-note">微信打开体验更佳，大家玩的开心～</p>
+      <p class="welcome-note">微信打开体验更佳，APP筹备中</p>
       <p class="welcome-contact">问题or建议🍠@singsing好</p>
     </div>
   </div>
@@ -1231,6 +1246,7 @@
       <div id="preview-wrap">
         <canvas id="canvas-preview"></canvas>
         <div class="photo-drag-hint" id="drag-hint">拖动照片调整位置</div>
+        <div class="text-input-hint" id="text-input-hint">请输入文字</div>
         <div class="split-handle" id="split-handle" title="上下拖动调整纯色区与照片区比例"></div>
       </div>
     </div>
@@ -1291,26 +1307,8 @@
           </div>
         </div>
         
-        <!-- 字号 -->
-        <div style="margin-bottom: 16px;">
-          <p class="field-label" style="margin-bottom: 8px;">字号</p>
-          <div class="slider-row">
-            <input type="range" id="font-size-slider" min="20" max="80" value="36" step="1">
-            <span id="font-size-val">36</span>
-          </div>
-        </div>
-        
-        <!-- 字距 -->
-        <div style="margin-bottom: 16px;">
-          <p class="field-label" style="margin-bottom: 8px;">字距</p>
-          <div class="slider-row">
-            <input type="range" id="letter-spacing-slider" min="0" max="30" value="2" step="0.5">
-            <span id="letter-spacing-val">2</span>
-          </div>
-        </div>
-        
         <!-- 内容 -->
-        <div>
+        <div style="margin-bottom: 16px;">
           <p class="field-label" style="margin-bottom: 12px;">内容</p>
           
           <!-- 城市开关 -->
@@ -1332,7 +1330,25 @@
           </label>
           
           <!-- 自定义输入 -->
-          <input type="text" id="caption-input" placeholder="输入文字" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 14px; color: #ddd; font-size: 14px; outline: none; display: none;">
+          <textarea id="caption-input" placeholder="输入文字" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #2e2e2e; border-radius: 8px; padding: 10px 14px; color: #ddd; font-size: 14px; outline: none; display: none; resize: vertical; min-height: 80px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;"></textarea>
+        </div>
+        
+        <!-- 字号 -->
+        <div style="margin-bottom: 16px;">
+          <p class="field-label" style="margin-bottom: 8px;">字号</p>
+          <div class="slider-row">
+            <input type="range" id="font-size-slider" min="20" max="80" value="36" step="1">
+            <span id="font-size-val">36</span>
+          </div>
+        </div>
+        
+        <!-- 字距 -->
+        <div>
+          <p class="field-label" style="margin-bottom: 8px;">字距</p>
+          <div class="slider-row">
+            <input type="range" id="letter-spacing-slider" min="0" max="30" value="2" step="0.5">
+            <span id="letter-spacing-val">2</span>
+          </div>
         </div>
       </div>
       
@@ -1479,31 +1495,27 @@ var welcomeCloseBtn = document.querySelector('.welcome-modal-close');
 
 // 欢迎弹窗逻辑
 function initWelcomeModal() {
-  // 强制显示弹窗测试
-  console.log('initWelcomeModal called');
-  welcomeModal.classList.add('visible');
-  
   // 检查日期（20260414 - 20260415）
-  // var today = new Date();
-  // var todayStr = today.getFullYear() + 
-  //               String(today.getMonth() + 1).padStart(2, '0') + 
-  //               String(today.getDate()).padStart(2, '0');
-  // 
-  // var startDate = '20260414';
-  // var endDate = '20260415';
-  // 
-  // // 检查是否在显示日期范围内
-  // if (todayStr >= startDate && todayStr <= endDate) {
-  //   // 检查今天是否已经显示过
-  //   var lastShownDate = localStorage.getItem('welcomeModalLastShown');
-  //   if (lastShownDate !== todayStr) {
-  //     // 显示弹窗
-  //     welcomeModal.classList.add('visible');
-  //     
-  //     // 标记今天已显示
-  //     localStorage.setItem('welcomeModalLastShown', todayStr);
-  //   }
-  // }
+  var today = new Date();
+  var todayStr = today.getFullYear() + 
+                String(today.getMonth() + 1).padStart(2, '0') + 
+                String(today.getDate()).padStart(2, '0');
+  
+  var startDate = '20260417';
+  var endDate = '20260418';
+  
+  // 检查是否在显示日期范围内
+  if (todayStr >= startDate && todayStr <= endDate) {
+    // 检查今天是否已经显示过
+    var lastShownDate = localStorage.getItem('welcomeModalLastShown');
+    if (lastShownDate !== todayStr) {
+      // 显示弹窗
+      welcomeModal.classList.add('visible');
+      
+      // 标记今天已显示
+      localStorage.setItem('welcomeModalLastShown', todayStr);
+    }
+  }
 }
 
 // 关闭弹窗
@@ -1642,6 +1654,16 @@ if (logoRefresh) {
   });
 }
 
+// 监听自定义文字输入，实时更新画布
+var captionInput = document.getElementById('caption-input');
+if (captionInput) {
+  captionInput.addEventListener('input', function() {
+    if (imgEl) {
+      drawCanvas();
+    }
+  });
+}
+
 // Build gradient pairs (3 gradients: 1+3, 2+4, 3+5)
 function buildGradientPairs() {
   if (!palette || palette.length < 2) return [];
@@ -1698,10 +1720,6 @@ async function handleFile(file) {
     setLoadingText('生成效果...');
     setLoadingSubtext('创建个性化调色板');
     document._savedGradients = [];
-    if (palette.length > 0) {
-      selectedBg = palette[0];
-      colorMode = 'solid';
-    }
     renderBgPalette();
     updateProgress(75);
 
@@ -1795,12 +1813,14 @@ async function handleFile(file) {
             if (!hasLocation && !hasTime) {
               showCustom = true;
               document.getElementById('show-custom-toggle').checked = true;
-              document.getElementById('caption-input').value = 'Location, Time';
+              document.getElementById('caption-input').value = '';
+              document.getElementById('caption-input').placeholder = '请输入文字';
               document.getElementById('caption-input').style.display = 'block';
             } else {
               showCustom = false;
               document.getElementById('show-custom-toggle').checked = false;
               document.getElementById('caption-input').value = '';
+              document.getElementById('caption-input').placeholder = '输入文字';
               document.getElementById('caption-input').style.display = 'none';
             }
           }
@@ -2017,16 +2037,10 @@ function drawCanvas() {
     if (palette.length > 0) {
       selectedBg = palette[0];
       colorMode = 'solid';
-      console.log('Set default color:', selectedBg);
     } else {
       return;
     }
   }
-  console.log('drawCanvas called with:', {
-    colorMode: colorMode,
-    selectedBg: selectedBg,
-    selectedGradient: selectedGradient
-  });
   var rat = ratioMap[currentRatio];
   var W = 1080, H = Math.round(W / rat);
   canvas.width = W;
@@ -2177,6 +2191,40 @@ function drawCanvas() {
   
   var caption = parts.join(', ');
   
+  // 控制文字输入提示的显示
+  var textInputHint = document.getElementById('text-input-hint');
+  if (textInputHint) {
+    // 计算提示位置
+    var textX, textY;
+    if (currentLayout === 'bottom' || currentLayout === 'top') {
+      textX = W / 2;
+      textY = currentLayout === 'bottom' ? bgY + bgSize / 2 : bgY + bgSize / 2;
+    } else {
+      textX = bgX + bgSize / 2;
+      textY = H / 2;
+    }
+    
+    // 转换为预览区的实际位置
+    var canvasRect = canvas.getBoundingClientRect();
+    var previewRect = document.getElementById('preview-wrap').getBoundingClientRect();
+    var scaleX = previewRect.width / W;
+    var scaleY = previewRect.height / H;
+    var hintX = (textX * scaleX) + previewRect.left - canvasRect.left;
+    var hintY = (textY * scaleY) + previewRect.top - canvasRect.top;
+    
+    textInputHint.style.left = hintX + 'px';
+    textInputHint.style.top = hintY + 'px';
+    textInputHint.style.transform = 'translate(-50%, -50%)';
+    
+    // 显示/隐藏提示
+    var shouldShowHint = showCustom && !customCaption && !extractedLocation && !extractedTime;
+    if (shouldShowHint) {
+      textInputHint.classList.add('visible');
+    } else {
+      textInputHint.classList.remove('visible');
+    }
+  }
+  
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   var baseTextHW = (fontStyle === 'handwriting' ? W * 0.039 : W * 0.036) * userFontScale;
@@ -2195,35 +2243,24 @@ function drawCanvas() {
   if (caption) {
     ctx.fillStyle = selectedTextColor;
     ctx.letterSpacing = userLetterSpacing + 'px';
+    var fontStr;
     if (fontStyle === 'handwriting') {
-      ctx.font = '300 ' + Math.round(baseTextHW) + "px Georgia,'Times New Roman','STSong',serif";
-      ctx.fillText(caption, textX, textY);
+      fontStr = '300 ' + Math.round(baseTextHW) + "px Georgia,'Times New Roman','STSong',serif";
     } else if (fontStyle === 'modern') {
-      ctx.font = '500 ' + Math.round(baseTextHW) + "px -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif";
-      ctx.fillText(caption, textX, textY);
+      fontStr = '500 ' + Math.round(baseTextHW) + "px -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif";
     } else {
-      ctx.font = '400 ' + Math.round(baseTextHW) + "px 'Courier New',Courier,Consolas,monospace";
-      ctx.fillText(caption, textX, textY);
+      fontStr = '400 ' + Math.round(baseTextHW) + "px 'Courier New',Courier,Consolas,monospace";
     }
-  } else {
-    // Show placeholder when no content
-    var a = 0.22;
-    var inv = selectedBg && (selectedBg.r + selectedBg.g + selectedBg.b) > 380 ? 'rgba(0,0,0,' + a + ')' : 'rgba(255,255,255,' + a + ')';
-    ctx.fillStyle = inv;
-    ctx.letterSpacing = userLetterSpacing + 'px';
-    var ph, fm;
-    if (fontStyle === 'handwriting') {
-      ph = '300 ';
-      fm = "Georgia,'Times New Roman','STSong',serif";
-    } else if (fontStyle === 'modern') {
-      ph = '500 ';
-      fm = "-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif";
-    } else {
-      ph = '400 ';
-      fm = "'Courier New',Courier,Consolas,monospace";
-    }
-    ctx.font = ph + Math.round(baseTextHW) + 'px ' + fm;
-    ctx.fillText('Location, Time', textX, textY);
+    ctx.font = fontStr;
+    
+    // 处理换行
+    var lines = caption.split('\n');
+    var lineHeight = baseTextHW * 1.5; // 行高为字体大小的1.5倍
+    var startY = textY - (lines.length - 1) * lineHeight / 2;
+    
+    lines.forEach(function(line, index) {
+      ctx.fillText(line, textX, startY + index * lineHeight);
+    });
   }
 
   // Retro noise overlay - only apply to background area
@@ -2337,14 +2374,15 @@ function drawCanvas() {
   // Photo drag
   canvas.addEventListener('mousedown', function(e) { e.preventDefault(); photoD = true; canvas.classList.add('photo-dragging'); lx = e.clientX; ly = e.clientY; });
   canvas.addEventListener('touchstart', function(e) { 
-    e.preventDefault();
     if (e.touches.length === 2) {
       // 双指捏合缩放
+      e.preventDefault();
       initialPinchDistance = getPinchDistance(e.touches);
       initialPhotoScale = photoScale;
       photoD = false;
     } else if (e.touches.length === 1) {
       // 单指移动
+      e.preventDefault();
       photoD = true; 
       canvas.classList.add('photo-dragging'); 
       lx = e.touches[0].clientX; 
@@ -2359,7 +2397,7 @@ function drawCanvas() {
     e.preventDefault();
     var rect = canvas.getBoundingClientRect();
     photoOffsetX += (e.clientX - lx) / rect.width * 2;
-    photoOffsetY += (e.clientY - ly) / rect.height * 2;
+    photoOffsetY -= (e.clientY - ly) / rect.height * 2;
     photoOffsetX = Math.max(-1, Math.min(1, photoOffsetX));
     photoOffsetY = Math.max(-1, Math.min(1, photoOffsetY));
     lx = e.clientX; ly = e.clientY;
@@ -2388,7 +2426,7 @@ function drawCanvas() {
       var deltaY = (ty - ly) / rect.height * 2;
       // 添加惯性效果
       photoOffsetX += deltaX * 0.8;
-      photoOffsetY += deltaY * 0.8;
+      photoOffsetY -= deltaY * 0.8;
       photoOffsetX = Math.max(-1, Math.min(1, photoOffsetX));
       photoOffsetY = Math.max(-1, Math.min(1, photoOffsetY));
       lx = tx; ly = ty;
@@ -3153,9 +3191,6 @@ document.getElementById('show-custom-toggle').addEventListener('change', functio
   showCustom = this.checked;
   var input = document.getElementById('caption-input');
   input.style.display = showCustom ? 'block' : 'none';
-  if (showCustom && !input.value) {
-    input.value = 'Location, Time';
-  }
   drawCanvas();
 });
 </script>
