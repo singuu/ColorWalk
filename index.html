@@ -1450,10 +1450,22 @@ function extractPalette(img, k) {
 
 // EXIF
 var exifrReady = false;
-var es = document.createElement('script');
-es.src = 'https://unpkg.com/exifr@7.1.3/dist/full.umd.js';
-es.onload = function() { exifrReady = true; };
-document.head.appendChild(es);
+var exifrLoadError = false;
+var exifrLoadedPromise = new Promise(function(resolve, reject) {
+  var es = document.createElement('script');
+  es.src = 'https://unpkg.com/exifr@7.1.3/dist/full.umd.js';
+  es.onload = function() { 
+    console.log('exifr 库加载成功');
+    exifrReady = true;
+    resolve();
+  };
+  es.onerror = function() {
+    console.log('exifr 库加载失败');
+    exifrLoadError = true;
+    reject();
+  };
+  document.head.appendChild(es);
+});
 
 // State
 var imgEl = null;
@@ -1506,15 +1518,8 @@ function initWelcomeModal() {
   
   // 检查是否在显示日期范围内
   if (todayStr >= startDate && todayStr <= endDate) {
-    // 检查今天是否已经显示过
-    var lastShownDate = localStorage.getItem('welcomeModalLastShown');
-    if (lastShownDate !== todayStr) {
-      // 显示弹窗
-      welcomeModal.classList.add('visible');
-      
-      // 标记今天已显示
-      localStorage.setItem('welcomeModalLastShown', todayStr);
-    }
+    // 17号和18号每次打开都显示弹窗
+    welcomeModal.classList.add('visible');
   }
 }
 
@@ -1735,12 +1740,22 @@ async function handleFile(file) {
     setLoadingText('优化效果...');
     setLoadingSubtext('提取位置和时间信息');
     
-    // 优化：不等待 exifr 加载完成，直接处理
+    // 等待 exifr 库加载完成（最多 5 秒）
+    try {
+      await Promise.race([
+        exifrLoadedPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error('exifr 加载超时')), 5000))
+      ]);
+    } catch(e) {
+      console.log('等待 exifr 加载失败:', e);
+    }
+    
+    // 处理 EXIF 数据
     if (window.exifr) {
       try {
         // 添加超时处理，避免地理编码请求过慢
         const exifPromise = window.exifr.parse(file, { gps: true, tiff: true });
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('EXIF 处理超时')), 3000));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('EXIF 处理超时')), 5000));
         
         try {
           var exif = await Promise.race([exifPromise, timeoutPromise]);
@@ -1761,42 +1776,179 @@ async function handleFile(file) {
             }
             
             if (exif.latitude && exif.longitude) {
+              console.log('GPS 坐标:', exif.latitude, exif.longitude);
               try {
-                // 添加地理编码超时处理
+                // 增加地理编码超时时间
                 const geoPromise = fetch(
-                  'https://nominatim.openstreetmap.org/reverse?lat=' + exif.latitude + '&lon=' + exif.longitude + '&format=json',
-                  { headers: { 'Accept-Language': 'en' }, timeout: 2000 }
+                  'https://nominatim.openstreetmap.org/reverse?lat=' + exif.latitude + '&lon=' + exif.longitude + '&format=json&accept-language=en',
+                  { headers: { 'Accept-Language': 'en' } }
                 );
-                const geoTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('地理编码超时')), 2000));
+                const geoTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('地理编码超时')), 8000));
                 
                 try {
+                  console.log('开始地理编码请求...');
                   var r = await Promise.race([geoPromise, geoTimeout]);
+                  console.log('地理编码请求成功，状态码:', r.status);
                   var g = await r.json();
+                  console.log('地理编码结果:', g);
                   var addr = g.address || {};
                   var country = addr.country || '';
-                  var city = '';
                   
+                  // 尝试获取更多位置信息
+                  var locationParts = [];
+                  
+                  // 对于中国，只使用城市或省份（不包含区县）
                   if (country === 'China' || country === '中国') {
-                    city = addr.state || addr.province || addr.city || '';
-                  } else {
-                    city = addr.city || addr.town || addr.village || addr.county || addr.state || 
-                           addr.district || addr.suburb || '';
-                  }
-                  
-                  if (city && country) {
-                    if (country === 'China' || country === '中国') {
-                      locStr = city;
-                    } else {
-                      locStr = city + ', ' + country;
+                    // 先尝试从display_name中找城市，这样可以找到更具体的信息
+                    var foundFromDisplay = false;
+                    if (g.display_name) {
+                      var displayName = g.display_name;
+                      var parts = displayName.split(', ');
+                      
+                      console.log('从display_name提取城市信息，地址部分:', parts);
+                      
+                      // 从后往前找，跳过国家、邮编，找到第一个非区县、非街道的部分
+                      var firstValidPart = null;
+                      var firstValidIndex = -1;
+                      
+                      for (var i = parts.length - 1; i >= 0; i--) {
+                        var part = parts[i].trim();
+                        
+                        console.log('检查部分:', part, '索引:', i);
+                        
+                        // 跳过国家
+                        if (part === 'China' || part === '中国') {
+                          console.log('跳过国家:', part);
+                          continue;
+                        }
+                        
+                        // 跳过邮编
+                        if (/^\d+$/.test(part)) {
+                          console.log('跳过邮编:', part);
+                          continue;
+                        }
+                        
+                        // 跳过区县
+                        if (part.includes('区') || part.includes('District')) {
+                          console.log('跳过区县:', part);
+                          continue;
+                        }
+                        
+                        // 跳过街道、路等
+                        if (part.includes('路') || part.includes('Road') || part.includes('街') || part.includes('Street') || part.includes('号') || part.includes('No.')) {
+                          console.log('跳过街道:', part);
+                          continue;
+                        }
+                        
+                        // 跳过建筑物名称
+                        if (i === 0) {
+                          console.log('跳过建筑物:', part);
+                          continue;
+                        }
+                        
+                        firstValidPart = part;
+                        firstValidIndex = i;
+                        console.log('找到第一个有效部分:', firstValidPart, '索引:', firstValidIndex);
+                        break;
+                      }
+                      
+                      // 找到了第一个有效部分后，继续往前找城市
+                      var cityFromDisplay = firstValidPart;
+                      if (firstValidPart !== null) {
+                        for (var j = firstValidIndex - 1; j >= 0; j--) {
+                          var previousPart = parts[j].trim();
+                          
+                          console.log('继续往前找城市，检查部分:', previousPart, '索引:', j);
+                          
+                          // 跳过区县
+                          if (previousPart.includes('区') || previousPart.includes('District')) {
+                            console.log('跳过区县:', previousPart);
+                            continue;
+                          }
+                          
+                          // 跳过街道、路等
+                          if (previousPart.includes('路') || previousPart.includes('Road') || previousPart.includes('街') || previousPart.includes('Street') || previousPart.includes('号') || previousPart.includes('No.')) {
+                            console.log('跳过街道:', previousPart);
+                            continue;
+                          }
+                          
+                          // 跳过建筑物名称
+                          if (j === 0) {
+                            console.log('跳过建筑物:', previousPart);
+                            continue;
+                          }
+                          
+                          // 找到城市
+                          cityFromDisplay = previousPart;
+                          console.log('找到城市:', cityFromDisplay);
+                          break;
+                        }
+                      }
+                      
+                      // 使用从display_name找到的城市
+                      if (cityFromDisplay) {
+                        locationParts.push(cityFromDisplay);
+                        console.log('从display_name找到的城市:', cityFromDisplay);
+                        foundFromDisplay = true;
+                      }
+                    }
+                    
+                    // 如果从display_name没有找到，再尝试从addr.province和addr.city中获取
+                    if (!foundFromDisplay) {
+                      // 尝试不同的字段名，确保能正确获取省份和城市
+                      var province = addr.province || addr.state || '';
+                      var city = addr.city || '';
+                      
+                      // 避免添加区县信息
+                      var validCity = '';
+                      var validProvince = '';
+                      
+                      if (city && !city.includes('区') && !city.includes('District')) {
+                        validCity = city;
+                      }
+                      if (province && !province.includes('区') && !province.includes('District')) {
+                        validProvince = province;
+                      }
+                      
+                      // 优先显示城市，如果没有城市再显示省份
+                      if (validCity) {
+                        locationParts.push(validCity);
+                        console.log('从addr.city找到的城市:', validCity);
+                      } else if (validProvince) {
+                        locationParts.push(validProvince);
+                        console.log('从addr.province找到的省份:', validProvince);
+                      }
                     }
                   } else {
-                    locStr = city || country || '';
+                    // 对于其他国家，使用城市和国家
+                    if (addr.city) locationParts.push(addr.city);
+                    else if (addr.town) locationParts.push(addr.town);
+                    else if (addr.village) locationParts.push(addr.village);
+                    else if (addr.county) locationParts.push(addr.county);
+                    else if (addr.state) locationParts.push(addr.state);
+                    else if (addr.district) locationParts.push(addr.district);
+                    else if (addr.suburb) locationParts.push(addr.suburb);
+                    
+                    if (country) locationParts.push(country);
                   }
+                  
+                  // 如果有位置信息，使用它
+                  if (locationParts.length > 0) {
+                    locStr = locationParts.join(', ');
+                  } else {
+                    // 如果没有任何位置信息，保持为空
+                    locStr = '';
+                  }
+                  console.log('最终位置:', locStr);
                 } catch(geoErr) {
-                  console.log('地理编码请求超时，跳过位置信息');
+                  console.log('地理编码请求超时，跳过位置信息:', geoErr);
+                  // 不使用经纬度作为备用，保持为空
+                  locStr = '';
                 }
               } catch(e) {
                 console.log('Location fetch error:', e);
+                // 不使用经纬度作为备用，保持为空
+                locStr = '';
               }
             }
             
@@ -1813,23 +1965,31 @@ async function handleFile(file) {
             if (!hasLocation && !hasTime) {
               showCustom = true;
               document.getElementById('show-custom-toggle').checked = true;
-              document.getElementById('caption-input').value = '';
-              document.getElementById('caption-input').placeholder = '请输入文字';
+              document.getElementById('caption-input').value = 'Location, Time';
               document.getElementById('caption-input').style.display = 'block';
             } else {
               showCustom = false;
               document.getElementById('show-custom-toggle').checked = false;
               document.getElementById('caption-input').value = '';
-              document.getElementById('caption-input').placeholder = '输入文字';
               document.getElementById('caption-input').style.display = 'none';
             }
           }
         } catch(timeoutErr) {
           console.log('EXIF 处理超时，跳过位置和时间信息');
+          // 确保变量被初始化
+          extractedLocation = '';
+          extractedTime = '';
         }
       } catch(exifErr) {
         console.log('EXIF 解析错误:', exifErr);
+        // 确保变量被初始化
+        extractedLocation = '';
+        extractedTime = '';
       }
+    } else {
+      // exifr 库加载失败，确保变量被初始化
+      extractedLocation = '';
+      extractedTime = '';
     }
     
     updateProgress(90);
@@ -2396,7 +2556,7 @@ function drawCanvas() {
     if (!photoD) return;
     e.preventDefault();
     var rect = canvas.getBoundingClientRect();
-    photoOffsetX += (e.clientX - lx) / rect.width * 2;
+    photoOffsetX -= (e.clientX - lx) / rect.width * 2;
     photoOffsetY -= (e.clientY - ly) / rect.height * 2;
     photoOffsetX = Math.max(-1, Math.min(1, photoOffsetX));
     photoOffsetY = Math.max(-1, Math.min(1, photoOffsetY));
@@ -2425,7 +2585,7 @@ function drawCanvas() {
       var deltaX = (tx - lx) / rect.width * 2;
       var deltaY = (ty - ly) / rect.height * 2;
       // 添加惯性效果
-      photoOffsetX += deltaX * 0.8;
+      photoOffsetX -= deltaX * 0.8;
       photoOffsetY -= deltaY * 0.8;
       photoOffsetX = Math.max(-1, Math.min(1, photoOffsetX));
       photoOffsetY = Math.max(-1, Math.min(1, photoOffsetY));
